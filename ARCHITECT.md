@@ -63,11 +63,17 @@ This applies especially to audit reports under `_doc/audits/`. Any content not p
 
 If an Implementer session terminates early due to ambiguity (QUESTIONS.md has new entries):
 1. Read the new QUESTIONS.md entries
-2. Resolve each question — confirm with the project owner if needed
-3. Update the relevant spec file with the decision
-4. Re-invoke the Implementer with the same task
+2. For each entry, determine the ruling per the table below
+3. Act on each ruling, then re-invoke the Implementer
 
-**Do not re-invoke without resolving all open questions first.**
+**Do not re-invoke without ruling on all open questions first.**
+
+### Ruling Decision Table
+
+| Ruling | Condition | Action |
+|--------|-----------|--------|
+| RESOLVE | Spec was genuinely unclear or silent on the scenario | Confirm with project owner if needed → patch the relevant spec file → re-invoke Implementer |
+| REJECT | Spec already covered the scenario; Implementer missed it | Do **not** modify the spec → return task to Implementer with a note citing the exact spec section they missed |
 
 ---
 ## 4. Sub-Agent Invocation

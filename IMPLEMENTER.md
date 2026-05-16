@@ -144,6 +144,7 @@ Self-check: can every changed line be traced directly to the task sheet?
 - ❌ Write spec reasoning in code comments — that means the spec is unclear; use QUESTIONS.md
 - ❌ Tests that only confirm "no error" without asserting behavior
 - ❌ Hardcoded passwords, keys, or URLs
+- ❌ Raise a question that is already answered in the spec
 
 ---
 

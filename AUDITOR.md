@@ -53,7 +53,7 @@ Step 2 — Review implementation output (read with spec lens)
 
 - **B1. Test completeness**: Every test item in the task sheet has a corresponding test?
 - **B2. Test quality**: Tests verify behavior, not just "no error"?
-- **B3. Test isolation**: All subprocess calls and file I/O mocked?
+- **B3. Test isolation**: All subprocess calls and file I/O mocked? Check whether tests use a mock/patch mechanism. If any I/O operation or subprocess call appears without being intercepted by a mock or patch — regardless of language or library — mark as CRITICAL.
 - **B4. Coverage**: Meets thresholds defined in `PROJECT_STRUCTURE.md`?
 
 ### Layer C: Standards Conformance
@@ -71,11 +71,11 @@ Step 2 — Review implementation output (read with spec lens)
 
 ## 3. Reporting Standards
 
-### 3.1 State facts only — no solutions
+### 3.1 State facts only — no code patches
 
-Format: "Spec requires X. Implementation does Y."
+Format: "Spec requires X. Implementation does Y." Expected and actual values may be described freely.
 
-**Never say**: "Should be changed to...", "Suggest...", "Consider..."
+**Never provide**: code fixes, implementation snippets, or patches of any kind.
 
 ### 3.2 Issue format
 
@@ -134,5 +134,5 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 - ❌ Downgrade or skip issues because "the implementer may have had a reason"
 - ❌ Give a conclusion before completing all four layers
 - ❌ Re-interpret the spec after reading the implementation
-- ❌ Provide any fix directions, suggestions, or solutions
+- ❌ Provide any code fixes, implementation snippets, or patches
 - ❌ Mark any issue as "can carry to next task"
