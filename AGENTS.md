@@ -166,11 +166,14 @@ Emergency spec correction: wait for current session to end, fix in next session 
 
 ### 5.2 Task Log (`_doc/logs/task-XXX.md`)
 
+> Architect must confirm all dependencies are completed before invoking Implementer. A task with unresolved dependencies must not be started.
+
 ```markdown
 # task-XXX Execution Log
 
 ## Info
 - Task: task-XXX
+- Depends on: task-XXX, task-XXX (or "none")
 - Executor: <Claude / Gemini>
 - Start: YYYY-MM-DD HH:MM
 - End: YYYY-MM-DD HH:MM

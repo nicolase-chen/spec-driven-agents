@@ -40,6 +40,8 @@ Rules:
 
 ## Directory Structure
 
+Task sheets should declare dependencies via `depends_on`. Architect is responsible for dependency resolution before each invocation.
+
 ```
 <project-root>/
 ├── src/
