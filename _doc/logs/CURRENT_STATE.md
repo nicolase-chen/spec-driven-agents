@@ -6,7 +6,7 @@
 - 整體進度：專案初始化，尚未開始
 
 ## 下一個 Session 應執行
-與 Nico 確認需求，建立第一份規格文件。
+Confirm requirements with project owner, create first spec.
 
 ## 待解問題
 無
@@ -15,4 +15,4 @@
 
 | 日期 | 決定內容 | 決定者 |
 |------|---------|--------|
-| （填入） | 專案初始化 | Nico |
+| (fill in) | Project initialized | Owner |

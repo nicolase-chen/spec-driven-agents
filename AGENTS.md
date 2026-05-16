@@ -161,7 +161,7 @@ Emergency spec correction: wait for current session to end, fix in next session 
 ## Decision Log
 | Date | Decision | By |
 |------|----------|----|
-| YYYY-MM-DD | <decision> | Architect / Nico |
+| YYYY-MM-DD | <decision> | Architect / Owner |
 ```
 
 ### 5.2 Task Log (`_doc/logs/task-XXX.md`)

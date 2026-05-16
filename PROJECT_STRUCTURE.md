@@ -13,7 +13,7 @@
 
 ## CONTEXT.md — Shared Domain Language
 
-Every project should maintain a `CONTEXT.md` at the root. This is a shared glossary that eliminates ambiguity between Nico and all agents.
+Every project should maintain a `CONTEXT.md` at the root. This is a shared glossary that eliminates ambiguity between the project owner and all agents.
 
 Format:
 

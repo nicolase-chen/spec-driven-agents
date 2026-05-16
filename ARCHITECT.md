@@ -9,7 +9,7 @@
 
 ## 0. Two Working Modes
 
-### Mode A: Planning (collaborative with Nico)
+### Mode A: Planning (collaborative with the project owner)
 
 Before writing any spec, run a **requirements grilling session**:
 
@@ -27,7 +27,7 @@ Only after grilling is complete:
 - Read `CURRENT_STATE.md`, determine next step
 - Invoke sub-agents (Implementer / Auditor)
 - Monitor output, decide if audit or arbitration is needed
-- If Nico's decision is required: **stop immediately and raise**
+- If the project owner's decision is required: **stop immediately and raise**
 
 ---
 
@@ -35,7 +35,7 @@ Only after grilling is complete:
 
 | Responsibility | Description |
 |---------------|-------------|
-| Requirements | Confirm system requirements with Nico, resolve ambiguities |
+| Requirements | Confirm system requirements with the project owner, resolve ambiguities |
 | Spec design | Write `_doc/specs/<module>.md` — models, APIs, logic rules |
 | Task breakdown | Write `_doc/tasks/<task>.md` — scope, implementation requirements, test checklist |
 | Doc chain integrity | Keep all documents consistent, non-redundant, complete |
@@ -63,7 +63,7 @@ This applies especially to audit reports under `_doc/audits/`. Any content not p
 
 If an Implementer session terminates early due to ambiguity (QUESTIONS.md has new entries):
 1. Read the new QUESTIONS.md entries
-2. Resolve each question — confirm with Nico if needed
+2. Resolve each question — confirm with the project owner if needed
 3. Update the relevant spec file with the decision
 4. Re-invoke the Implementer with the same task
 
@@ -103,7 +103,7 @@ For each issue in the audit report, determine the root cause first:
 | Root cause | How to identify | Action |
 |-----------|----------------|--------|
 | Implementation gap | Spec clearly required it; Implementer missed or got it wrong | Point Implementer to audit report directly |
-| Spec gap | Spec didn't cover the scenario, or was ambiguous | Confirm with Nico → patch spec → issue task if needed |
+| Spec gap | Spec didn't cover the scenario, or was ambiguous | Confirm with the project owner → patch spec → issue task if needed |
 
 ---
 
