@@ -151,18 +151,27 @@ Emergency spec correction: wait for current session to end, fix in next session 
 - Last updated: YYYY-MM-DD
 - Active task: task-XXX (or "none")
 - Overall progress: <one sentence>
+- Last verified by: <Auditor / Architect> after task-XXX (or "not yet verified")
+
+## Active Context
+- Spec files needed: _doc/specs/XXX.md, _doc/specs/YYY.md
+- Open questions: Q-XXX (or "none")
+- Depends on (unresolved): task-XXX (or "none")
 
 ## Next Session Should
 <clear next action>
 
-## Open Questions
-<list from QUESTIONS.md, or "none">
+## Known Pitfalls
+<extracted from past task logs — specific gotchas the next session should know>
+(or "none")
 
 ## Decision Log
 | Date | Decision | By |
 |------|----------|----|
 | YYYY-MM-DD | <decision> | Architect / Owner |
 ```
+
+> CURRENT_STATE.md accuracy is verified by Auditor during post-audit. It is not guaranteed to be real-time correct. If in doubt, cross-check against the cited spec files directly.
 
 ### 5.2 Task Log (`_doc/logs/task-XXX.md`)
 
@@ -173,6 +182,7 @@ Emergency spec correction: wait for current session to end, fix in next session 
 
 ## Info
 - Task: task-XXX
+- Affects: _doc/specs/XXX.md (or "none")
 - Depends on: task-XXX, task-XXX (or "none")
 - Executor: <Claude / Gemini>
 - Start: YYYY-MM-DD HH:MM
@@ -234,12 +244,20 @@ Audits are **risk-driven**, not mandatory every round.
 
 | Situation | Recommendation |
 |-----------|---------------|
+| Task sheet references 2+ spec files | ✅ Pre-implementation spec consistency audit |
+| Task has depends_on entries | ✅ Pre-implementation spec consistency audit |
+| Task adds or modifies any API interface | ✅ Pre-implementation spec consistency audit |
+| Task modifies a shared structure used by multiple modules | ✅ Pre-implementation spec consistency audit |
+| None of the above | ⛔ Architect self-check only |
 | New module, model, or API | ✅ Audit |
 | Complex logic (state machine, async, permissions) | ✅ Audit |
 | Implementer task log shows unexpected decisions | ✅ Audit |
 | Implementer raised questions in QUESTIONS.md | Resolve first, then decide |
 | Pure bugfix or minor test addition | ⛔ Skip |
 | Fixing audit-reported implementation gaps | ⛔ Skip |
+
+> Pre-implementation audit scope is limited to spec consistency only — no code review. Use this prompt:
+> `[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation spec consistency check for task-XXX. Verify only: are all references in the task sheet consistent with the cited spec files? Do not review any code.`
 
 Audit report naming: `_doc/audits/audit-<task-id>-<n>.md` (n starts at 1).
 All CRITICAL and WARNING items must be resolved before moving to the next task.

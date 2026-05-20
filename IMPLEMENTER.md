@@ -12,7 +12,9 @@
 1. Read AGENTS.md
 2. Read _doc/logs/CURRENT_STATE.md
 3. Read _doc/tasks/<task>.md
-4. Read _doc/specs/<relevant modules>.md
+4. Read the spec files listed in CURRENT_STATE.md "Spec files needed"
+         — read exactly those files, no more. If the field is empty, read
+         the specs referenced in the task sheet.
 5. Create task log: _doc/logs/task-XXX.md
 6. Begin execution
 ```
@@ -156,6 +158,7 @@ Self-check: can every changed line be traced directly to the task sheet?
 | Spec contradicts itself | Write to QUESTIONS.md, terminate session immediately |
 | Technical blocker | Log in task log, raise specifically |
 | Must deviate from task sheet | Document in "Decisions Made" section of task log |
+| Implementation may cause drift in a spec listed under "affects" | Write to QUESTIONS.md, describe the potential drift |
 
 ---
 

@@ -19,6 +19,8 @@ Before writing any spec, run a **requirements grilling session**:
 - Surface edge cases and force precision: "You said 'login' — do you mean password auth, SSH key, or OTP? Those are different things."
 - Do not proceed to spec writing until all branches are resolved
 
+Before proceeding to spec writing, CONTEXT.md must contain at least one resolved term. An empty CONTEXT.md means grilling is incomplete.
+
 Only after grilling is complete:
 - Produce `_doc/specs/` and `_doc/tasks/` documents
 - Update `CONTEXT.md` with any new terms resolved during the session
@@ -31,7 +33,30 @@ Only after grilling is complete:
 
 ---
 
-## 1. Responsibilities
+## 1. Spec Design Standards
+
+### When to split
+- Changing A does not require changing B
+- Can be tested independently
+- Referenced by different tasks
+- Belongs to a different business boundary
+
+### When to merge
+- Changing A always requires changing B
+- Fewer than 3 API endpoints or functions
+- Fewer than 3 TDD vertical slices
+- Always referenced by the same set of tasks
+- Cannot describe the business boundary in one sentence
+
+### Scale guideline
+Normal range: 5–15 spec files per project.
+More than 20: review whether specs are over-fragmented.
+Record each spec's one-sentence boundary description in
+PROJECT_STRUCTURE.md spec map. If you cannot write it, merge the spec.
+
+---
+
+## 2. Responsibilities
 
 | Responsibility | Description |
 |---------------|-------------|
@@ -45,7 +70,7 @@ Only after grilling is complete:
 
 ---
 
-## 2. Sub-Agent Output Handling
+## 3. Sub-Agent Output Handling
 
 **Architect is a lossless relay, not an interpreter.**
 
@@ -59,7 +84,7 @@ This applies especially to audit reports under `_doc/audits/`. Any content not p
 
 ---
 
-## 3. Handling Implementer Session Termination
+## 4. Handling Implementer Session Termination
 
 If an Implementer session terminates early due to ambiguity (QUESTIONS.md has new entries):
 1. Read the new QUESTIONS.md entries
@@ -73,10 +98,11 @@ If an Implementer session terminates early due to ambiguity (QUESTIONS.md has ne
 | Ruling | Condition | Action |
 |--------|-----------|--------|
 | RESOLVE | Spec was genuinely unclear or silent on the scenario | Confirm with project owner if needed → patch the relevant spec file → re-invoke Implementer |
-| REJECT | Spec already covered the scenario; Implementer missed it | Do **not** modify the spec → return task to Implementer with a note citing the exact spec section they missed |
+| REJECT | Spec already covered the scenario; Implementer missed it | Do **not** modify the spec → return task to Implementer with a note citing the exact spec section they missed. REJECT requires citing the exact spec file, section, and original text that answers the question. "Already in the spec" without a reference is not a valid REJECT. |
 
 ---
-## 4. Sub-Agent Invocation
+
+## 5. Sub-Agent Invocation
 
 **Complete doc chain → shortest possible prompt.** All details live in documents, not in prompts.
 
@@ -102,7 +128,7 @@ If an Implementer session terminates early due to ambiguity (QUESTIONS.md has ne
 
 ---
 
-## 5. Handling Audit Results
+## 6. Handling Audit Results
 
 For each issue in the audit report, determine the root cause first:
 
@@ -113,7 +139,7 @@ For each issue in the audit report, determine the root cause first:
 
 ---
 
-## 6. Pre-Delivery Checklist (before handing task to Implementer)
+## 7. Pre-Delivery Checklist (before handing task to Implementer)
 
 ```
 □ Doc chain complete (AGENTS.md → spec → task sheet)
@@ -123,11 +149,12 @@ For each issue in the audit report, determine the root cause first:
 □ Task sheet test checklist is complete
 □ CURRENT_STATE.md "Next Session Should" is updated
 □ Architect session log created
+□ Assess pre-implementation audit need — if any trigger condition in AGENTS.md §6 is met, invoke Auditor for spec consistency check before invoking Implementer.
 ```
 
 ---
 
-## 7. Prohibited
+## 8. Prohibited
 
 - ❌ Write any code (even "just as an example")
 - ❌ Modify frozen documents during Implementer execution (see AGENTS.md §4)

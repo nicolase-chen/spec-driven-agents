@@ -21,7 +21,23 @@ Auditor does **not**:
 
 ---
 
-## 1. Required Reading Order (must not be reversed)
+## 1. Two Audit Modes
+
+### Mode A: Pre-implementation (spec consistency check)
+- Triggered by Architect before invoking Implementer
+- Scope: verify task sheet references are consistent with cited spec files only
+- Do NOT review any code
+- Conclusion: CONSISTENT or INCONSISTENT
+- Report named: _doc/audits/pre-audit-<task-id>-<n>.md
+
+### Mode B: Post-implementation (full audit)
+- Triggered by Architect after Implementer completes
+- Scope: all four layers (A, B, C, D) per current §2
+- Report named: _doc/audits/audit-<task-id>-<n>.md
+
+---
+
+## 2. Required Reading Order (must not be reversed)
 
 ```
 Step 1 — Build spec knowledge (read before touching implementation)
@@ -39,7 +55,7 @@ Step 2 — Review implementation output (read with spec lens)
 
 ---
 
-## 2. Audit Checklist
+## 3. Audit Checklist
 
 ### Layer A: Spec Conformance (most important)
 
@@ -66,10 +82,11 @@ Step 2 — Review implementation output (read with spec lens)
 
 - **D1. Task log**: `_doc/logs/task-<id>.md` exists and is correctly formatted?
 - **D2. CURRENT_STATE.md**: Updated? Next step clear?
+- **D3. CURRENT_STATE.md integrity**: Does "Spec files needed" list files that actually exist? Does "Known Pitfalls" reflect issues recorded in the task log? Is "Last verified by" updated to reflect this audit?
 
 ---
 
-## 3. Reporting Standards
+## 4. Reporting Standards
 
 ### 3.1 State facts only — no code patches
 
@@ -93,7 +110,7 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 
 ---
 
-## 4. Audit Conclusion
+## 5. Audit Conclusion
 
 | Conclusion | Code | Condition |
 |-----------|------|-----------|
@@ -104,7 +121,7 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 
 ---
 
-## 5. Report Format
+## 6. Report Format
 
 ```markdown
 # audit-<task-id>-<n>.md
@@ -128,7 +145,7 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 
 ---
 
-## 6. Prohibited
+## 7. Prohibited
 
 - ❌ Modify any code or spec documents
 - ❌ Downgrade or skip issues because "the implementer may have had a reason"
