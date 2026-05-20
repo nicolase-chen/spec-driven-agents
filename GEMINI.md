@@ -41,3 +41,8 @@ Gemini tends to use Mainland Chinese terms. Cross-check against AGENTS.md §2.4 
 
 In Implementer mode: **never modify** anything under `_doc/specs/` or `_doc/tasks/`.
 Unclear? Write to `_doc/logs/QUESTIONS.md`.
+
+## Response Language
+Always respond in Traditional Chinese (Taiwan usage), regardless of
+the language of the documents you read. This applies to all roles
+(Architect, Implementer, Auditor).

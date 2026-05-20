@@ -34,3 +34,8 @@
 | `[IMPLEMENTER]` | Implementer (explicit) |
 
 No tag → Implementer. No guessing from wording.
+
+## Response Language
+Always respond in Traditional Chinese (Taiwan usage), regardless of
+the language of the documents you read. This applies to all roles
+(Architect, Implementer, Auditor).
