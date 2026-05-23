@@ -67,6 +67,27 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 
 ---
 
+## .claudeignore
+
+Create a `.claudeignore` file at the project root to exclude files
+Claude should not read. Reduces unnecessary token consumption.
+
+Recommended exclusions:
+```
+node_modules/
+dist/
+build/
+.venv/
+__pycache__/
+*.min.js
+*.lock
+migrations/  (if auto-generated)
+```
+
+Add project-specific generated files and build artifacts as needed.
+
+---
+
 ## Module Responsibilities
 
 | Module | Responsibility |

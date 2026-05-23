@@ -184,6 +184,9 @@ Emergency spec correction: wait for current session to end, fix in next session 
 - Task: task-XXX
 - Affects: _doc/specs/XXX.md (or "none")
 - Depends on: task-XXX, task-XXX (or "none")
+- Out of scope: <explicitly list what is NOT included in this task>
+- Relevant files: <files Implementer should read, e.g. apps/auth/views.py, apps/auth/models.py>
+- Entry point: <specific file or function to start from>
 - Executor: <Claude / Gemini>
 - Start: YYYY-MM-DD HH:MM
 - End: YYYY-MM-DD HH:MM
