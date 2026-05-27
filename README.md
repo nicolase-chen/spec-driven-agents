@@ -50,14 +50,16 @@ your-project/
 ├── GEMINI.md              ← Gemini CLI entry point
 ├── CONTEXT.md             ← Shared domain language / glossary
 ├── PROJECT_STRUCTURE.md   ← Project layout (fill per project)
-└── _doc/
-    ├── specs/             ← Module specs (Architect writes)
-    ├── tasks/             ← Task sheets (Architect writes)
-    ├── logs/
-    │   ├── CURRENT_STATE.md   ← Session continuity
-    │   ├── QUESTIONS.md       ← Ambiguity queue
-    │   └── task-XXX.md        ← Execution logs
-    └── audits/            ← Audit reports
+├── _doc/
+│   ├── specs/             ← Module specs (Architect writes)
+│   ├── tasks/             ← Task sheets (Architect writes)
+│   ├── logs/
+│   │   ├── CURRENT_STATE.md   ← Session continuity
+│   │   ├── QUESTIONS.md       ← Ambiguity queue
+│   │   └── task-XXX.md        ← Execution logs
+│   └── audits/            ← Audit reports
+└── .claude/
+    └── agents/            ← Claude Code subagent configs (model + tools)
 ```
 
 ---
@@ -78,6 +80,44 @@ vim CONTEXT.md             # domain glossary — add terms as you go
 # 4. Once specs exist, Implementer sessions run automatically via sub-agent calls
 # 5. Auditor sessions are triggered by Architect when risk warrants it
 ```
+
+---
+
+## Optional: Claude Code Subagents
+
+If you use Claude Code, pre-configured subagent profiles are included in `.claude/agents/`.
+Each agent is assigned an appropriate model to balance quality and cost:
+
+| Agent | Model | Role |
+|-------|-------|------|
+| implementer | Haiku | Executes tasks — rule-following, no judgment needed |
+| pre-auditor | Haiku | Spec consistency check before implementation |
+| auditor | Sonnet | Full four-layer audit — requires reasoning |
+| explore | Haiku | Codebase exploration, codegraph-aware |
+
+Gemini CLI and Codex use prompt tags directly — subagent configs are Claude Code only.
+All behavioral rules stay in AGENTS.md and role files, so all tools stay in sync automatically.
+
+---
+
+## Optional: CodeGraph Integration
+
+[CodeGraph](https://github.com/colbymchenry/codegraph) pre-indexes your codebase into a
+local SQLite knowledge graph. When initialized, the `explore` subagent uses it automatically.
+
+**Install:**
+```bash
+npx @colbymchenry/codegraph
+cd your-project
+codegraph init -i
+```
+
+**What it does:**
+- 90%+ fewer tool calls during codebase exploration
+- Architect can run `codegraph_impact` before filling the `affects` field in task sheets
+- Implementer uses `codegraph affected` to run only impacted tests
+
+**Without CodeGraph:** everything works normally — explore agent falls back to grep/glob/read.
 
 ---
 
