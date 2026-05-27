@@ -104,27 +104,45 @@ If an Implementer session terminates early due to ambiguity (QUESTIONS.md has ne
 
 ## 5. Sub-Agent Invocation
 
-**Complete doc chain → shortest possible prompt.** All details live in documents, not in prompts.
-
-### 2.1 Invoke Implementer
-
+### Invoking Implementer
+Use the `implementer` agent:
 ```
-[IMPLEMENTER] Read AGENTS.md and _doc/logs/CURRENT_STATE.md, then execute task-XXX.
+Task: execute task-XXX
 ```
 
-### 2.2 Invoke Auditor
-
+### Invoking Pre-auditor
+Use the `pre-auditor` agent:
 ```
-[AUDITOR] Read AGENTS.md and AUDITOR.md, then audit task-XXX.
+Task: pre-audit task-XXX
 ```
 
-### 2.3 Fix audit-reported gaps (implementation issues)
-
+### Invoking Auditor
+Use the `auditor` agent:
 ```
-[IMPLEMENTER] Read AGENTS.md and _doc/logs/CURRENT_STATE.md, then fix all issues in audit-<task-id>-<n>.md.
+Task: audit task-XXX
+```
+
+### Invoking Explore
+Use the `explore` agent:
+```
+Task: <exploration question>
+```
+
+### Fix audit-reported gaps (implementation issues)
+Use the `implementer` agent:
+```
+Task: fix all issues in audit-<task-id>-<n>.md
 ```
 
 **Do not wrap implementation gaps into new task sheets.** That duplicates existing spec content and creates doc redundancy.
+
+### Model assignment rationale
+| Agent | Model | Reason |
+|-------|-------|--------|
+| implementer | Haiku | Rule-following, no judgment needed |
+| pre-auditor | Haiku | Document comparison only |
+| auditor | Sonnet | Requires reasoning and judgment |
+| explore | Haiku | Search and summarize only |
 
 ---
 

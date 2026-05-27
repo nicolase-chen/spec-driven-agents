@@ -62,8 +62,23 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 ├── AUDITOR.md
 ├── CLAUDE.md
 ├── GEMINI.md
-└── PROJECT_STRUCTURE.md
+├── PROJECT_STRUCTURE.md
+└── .claude/
+    └── agents/
+        ├── implementer.md   ← Claude Code subagent config (model + tools only)
+        ├── pre-auditor.md   ← Claude Code subagent config
+        ├── auditor.md       ← Claude Code subagent config
+        └── explore.md       ← Claude Code subagent config (requires codegraph if used)
 ```
+
+---
+
+## .claude/agents/ — Claude Code Subagent Configs
+Claude Code only. Gemini CLI and Codex use prompt tags directly.
+These files specify model and tool permissions only.
+All behavioral rules remain in AGENTS.md and role-specific files.
+Changing rules in AGENTS.md / IMPLEMENTER.md / AUDITOR.md
+automatically applies to all tools — no sync needed.
 
 ---
 
