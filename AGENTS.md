@@ -91,6 +91,12 @@ On session end: update `CURRENT_STATE.md` so the next session can resume without
 - All subprocess calls must be mocked (no real system commands in tests)
 - All file I/O must be mocked or use `tmp_path` (no real paths in tests)
 
+When codegraph is initialized (.codegraph/ exists):
+- Use `git diff --name-only | codegraph affected --stdin` to identify
+  impacted tests after each change
+- Run only affected tests during development cycles
+- Run full test suite only before session end
+
 ### 2.4 Language
 
 - All docs, logs, and explanations: **Traditional Chinese (Taiwan usage)**

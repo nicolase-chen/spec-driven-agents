@@ -54,6 +54,10 @@ More than 20: review whether specs are over-fragmented.
 Record each spec's one-sentence boundary description in
 PROJECT_STRUCTURE.md spec map. If you cannot write it, merge the spec.
 
+When codegraph is initialized, use `codegraph_context <task description>`
+to verify cross-module dependencies before finalizing spec boundaries.
+This catches hidden dependencies that manual review may miss.
+
 ---
 
 ## 2. Responsibilities
@@ -168,6 +172,9 @@ For each issue in the audit report, determine the root cause first:
 □ CURRENT_STATE.md "Next Session Should" is updated
 □ Architect session log created
 □ Assess pre-implementation audit need — if any trigger condition in AGENTS.md §6 is met, invoke Auditor for spec consistency check before invoking Implementer.
+□ If .codegraph/ exists, run `codegraph_impact <key symbol>` before
+  filling the `affects` field — use the output directly rather than
+  estimating manually
 ```
 
 ---

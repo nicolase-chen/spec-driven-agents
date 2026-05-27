@@ -51,6 +51,14 @@ Step 2 — Review implementation output (read with spec lens)
 6. Relevant source code and tests
 ```
 
+When codegraph is initialized (.codegraph/ exists):
+- Use `codegraph_search <symbol>` instead of grep to locate symbols
+- Use `codegraph_callers` / `codegraph_callees` to trace call flow
+- Use `codegraph_impact` to verify the blast radius of changes
+- Do NOT use codegraph_explore in the main audit session —
+  spawn the `explore` agent instead
+- Fall back to grep/read only when codegraph returns no results
+
 **Strict requirement: finish all spec reading before reading any implementation.**
 
 ---

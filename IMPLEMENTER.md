@@ -85,6 +85,12 @@ For each behavior, one at a time:
 7. Repeat for next behavior
 ```
 
+When codegraph is initialized:
+- After each Red-Green cycle, run:
+  `git diff --name-only | codegraph affected --stdin`
+- Run only the affected tests, not the full suite
+- Run full suite only at session end (§6 Session End Sequence)
+
 ### 3.3 Test quality checklist (per cycle)
 
 ```
