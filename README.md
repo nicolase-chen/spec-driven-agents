@@ -51,13 +51,15 @@ your-project/
 ├── CONTEXT.md             ← Shared domain language / glossary
 ├── PROJECT_STRUCTURE.md   ← Project layout (fill per project)
 ├── _doc/
-│   ├── specs/             ← Module specs (Architect writes)
-│   ├── tasks/             ← Task sheets (Architect writes)
+│   ├── specs/
+│   │   └── example.md         ← Module spec template
+│   ├── tasks/
+│   │   └── example.md         ← Task sheet template
 │   ├── logs/
 │   │   ├── CURRENT_STATE.md   ← Session continuity
 │   │   ├── QUESTIONS.md       ← Ambiguity queue
 │   │   └── task-XXX.md        ← Execution logs
-│   └── audits/            ← Audit reports
+│   └── audits/                ← Audit reports (Auditor produces)
 └── .claude/
     └── agents/            ← Claude Code subagent configs (model + tools)
 ```
@@ -156,6 +158,41 @@ Works with any AI agent that reads markdown files:
 - ✅ Gemini CLI  
 - ✅ Codex CLI
 - ✅ Any agent with file access
+
+---
+
+## Upgrading
+
+To upgrade an existing project to a new framework version:
+
+```bash
+# Download new version into _ref/
+mkdir -p _ref
+curl -L https://github.com/nicolase-chen/spec-driven-agents/archive/vX.X.X.zip -o _ref/framework.zip
+unzip _ref/framework.zip -d _ref/
+rm _ref/framework.zip
+```
+
+Then run this migration prompt in Claude Code:
+
+```
+[ARCHITECT] Read AGENTS.md and all framework files in the project root,
+then read _ref/spec-driven-agents-X.X.X/ for the new framework version.
+Migrate the project's framework files to the new standard.
+Preserve all project-specific content.
+Do NOT touch _doc/specs/, _doc/tasks/, _doc/logs/, _doc/audits/
+Report diff summary and wait for confirmation before making changes.
+Respond in Traditional Chinese.
+```
+
+After confirming and applying changes:
+
+```bash
+rm -rf _ref/spec-driven-agents-X.X.X
+git add AGENTS.md ARCHITECT.md IMPLEMENTER.md AUDITOR.md CLAUDE.md GEMINI.md
+git commit -m "chore: migrate framework to spec-driven-agents vX.X.X"
+git push
+```
 
 ---
 
