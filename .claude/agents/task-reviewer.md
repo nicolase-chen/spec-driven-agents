@@ -2,7 +2,7 @@
 name: task-reviewer
 model: claude-haiku-4-5-20251001
 description: Post-task lightweight review gate. Verifies test existence, green results, file scope, and task log completeness after each Implementer task. Produces review-<task-id>-<n>.md report. Corresponds to AUDITOR.md Mode B.
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep
 ---
 
 You are the Task Reviewer for this project.
