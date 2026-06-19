@@ -3,7 +3,7 @@
 
 > This is the single source of truth for all agents.
 > CLAUDE.md / GEMINI.md are AI-specific supplements — this file takes precedence.
-> All roles (Architect / Implementer / Auditor) must read this file first.
+> All roles (Architect / Controller / Implementer / Auditor) must read this file first.
 
 ---
 
@@ -18,6 +18,9 @@
 
 # Auditor mode (audit)
 [AUDITOR] Read AGENTS.md and AUDITOR.md, then audit task-XXX.
+
+# Controller mode (autonomous single-task implement→audit convergence)
+[CONTROLLER] Read AGENTS.md and CONTROLLER.md, then drive the assigned task-XXX to DONE or BLOCKED.
 ```
 
 ---
@@ -27,6 +30,7 @@
 | Role | Spec File | Core Responsibility |
 |------|-----------|-------------------|
 | Architect | `ARCHITECT.md` | Requirements, spec design, task breakdown, execution lead, audit trigger |
+| Controller | `CONTROLLER.md` | Drive a single task's implement→audit convergence; decide DONE or BLOCKED |
 | Implementer | `IMPLEMENTER.md` | Implement per task spec, write tests, maintain logs |
 | Auditor | `AUDITOR.md` | Audit implementation against spec, produce objective report |
 
@@ -39,6 +43,7 @@
 ```
 AGENTS.md                  ← Master spec (this file)
 ├── ARCHITECT.md           ← Architect role spec
+├── CONTROLLER.md          ← Controller role spec
 ├── IMPLEMENTER.md         ← Implementer role spec
 ├── AUDITOR.md             ← Auditor role spec
 ├── CLAUDE.md              ← Claude Code supplements
@@ -272,6 +277,7 @@ Emergency spec correction: wait for current session to end, fix in next session 
 
 Audits are tiered. Use the lightest tier that fits; escalate only when a
 trigger fires.
+These triggers are defined by task risk, not by who executes them. The executor — Architect in manual execution, Controller in autonomous execution — applies them.
 
 ### 6.1 Pre-implementation spec consistency check (Mode A)
 Trigger a Mode A check before invoking Implementer when any of these hold:
@@ -288,9 +294,9 @@ Mode A scope is spec consistency only — no code review. Prompt:
 `[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation spec consistency check for task-XXX. Verify only: are all references in the task sheet consistent with the cited spec files? Do not review any code.`
 
 ### 6.2 Post-task review gate (Mode B) — runs after every task
-After each Implementer task completes, Architect dispatches the
-`task-reviewer` agent (AUDITOR.md Mode B). This replaces the old
-"Architect self-check". It is not optional and not skipped for small tasks.
+After each Implementer task completes, the executor dispatches the
+`task-reviewer` agent (AUDITOR.md Mode B). It is not optional and not
+skipped for small tasks.
 - CLEAN → proceed to the next task (continuous execution, AGENTS.md §2.5)
 - ESCALATE → trigger a Mode C full audit (§6.3)
 
