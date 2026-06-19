@@ -35,6 +35,7 @@ The key rules:
 - **Auditor is always a fresh session** — isolated view, no contamination from implementation context
 - **Architect is a lossless relay** — sub-agent output is transcribed verbatim, never "improved"
 - **TDD is vertical slices** — one test → one implementation, never all tests first
+- **Review is tiered** — a lightweight per-task gate runs after every task; full independent audits and a final whole-feature audit fire only when risk warrants
 
 ---
 
