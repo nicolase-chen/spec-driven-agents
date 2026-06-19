@@ -107,6 +107,14 @@ When writing sub-agent output to any file:
 
 This applies especially to audit reports under `_doc/audits/`. Any content not produced by the Auditor has no place in those files.
 
+### Thin handoff
+Sub-agents write their full output to files (task logs, review/audit
+reports) and return only a thin status line. The lossless-relay rule above
+applies to that returned status. Do not request, expect, or relay large
+diffs or full test output through your context — read them from the task log
+or git history when needed. This keeps your context from bloating across a
+multi-task run.
+
 ---
 
 ## 4. Handling Implementer Session Termination

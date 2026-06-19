@@ -215,6 +215,8 @@ Emergency spec correction: wait for current session to end, fix in next session 
 - Executor: <Claude / Gemini>
 - Start: YYYY-MM-DD HH:MM
 - End: YYYY-MM-DD HH:MM
+- Base commit: <SHA at task start, or "n/a">
+- Head commit: <SHA at task end, or "n/a">
 
 ## Objective
 <one sentence>

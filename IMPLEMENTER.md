@@ -175,4 +175,11 @@ Self-check: can every changed line be traced directly to the task sheet?
 2. Complete task log (paste actual test output)
 3. Update CURRENT_STATE.md
 4. Confirm all open questions are in QUESTIONS.md
+5. Return to the caller a thin status line only — do not paste diffs or full
+   test output into the response:
+   `done | task-XXX | tests: <pass>/<total> green | files changed: <n>, all in scope | log: _doc/logs/task-XXX.md`
+   Full diff and complete test output live in the task log and git history,
+   not in the return message.
+6. Record this task's commit range (Base / Head SHA) in the task log Info
+   block so the review gate reads the diff from git instead of a pasted copy.
 ```
