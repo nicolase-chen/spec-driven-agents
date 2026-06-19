@@ -65,12 +65,18 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 ├── PROJECT_STRUCTURE.md
 └── .claude/
     └── agents/
-        ├── implementer.md   ← Claude Code subagent config (model + tools only)
+        ├── implementer.md   ← Claude Code subagent config (model + tools + pointer body)
         ├── pre-auditor.md   ← Claude Code subagent config
         ├── auditor.md       ← Claude Code subagent config
         ├── task-reviewer.md ← Claude Code subagent config (post-task review gate)
         └── explore.md       ← Claude Code subagent config (requires codegraph if used)
 ```
+
+**Agent config authoring rule:** an `.claude/agents/*.md` body may only
+(a) name the role, (b) point to the relevant role doc and section for its
+behavior, and (c) state its conclusion vocabulary and response language.
+It must not embed concrete tools or mechanisms. Mechanism is defined in
+the role doc only; duplicating it in an agent body causes drift.
 
 ---
 
