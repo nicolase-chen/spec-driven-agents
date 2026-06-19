@@ -70,6 +70,15 @@ When codegraph is initialized, use `codegraph_context <task description>`
 to verify cross-module dependencies before finalizing spec boundaries.
 This catches hidden dependencies that manual review may miss.
 
+### Interface contracts between tasks
+When a task depends on or feeds another task, declare the interface
+explicitly in the task log Info block (Consumes / Produces) with exact
+signatures — function name, parameter types, return type. This lets each
+Implementer learn neighbouring tasks' contracts from the task sheet alone,
+without reading their source code, preserving session isolation. If you
+cannot state a produced interface precisely, the task is not ready to
+dispatch.
+
 ---
 
 ## 2. Responsibilities

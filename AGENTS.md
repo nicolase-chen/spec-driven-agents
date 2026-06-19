@@ -207,6 +207,8 @@ Emergency spec correction: wait for current session to end, fix in next session 
 - Task: task-XXX
 - Affects: _doc/specs/XXX.md (or "none")
 - Depends on: task-XXX, task-XXX (or "none")
+- Consumes: <upstream interfaces this task relies on — exact signatures: function name, params, return type, from completed dependency tasks. Or "none">
+- Produces: <interfaces later tasks will rely on — exact function names, params, return types. Or "none">
 - Out of scope: <explicitly list what is NOT included in this task>
 - Relevant files: <files Implementer should read, e.g. apps/auth/views.py, apps/auth/models.py>
 - Entry point: <specific file or function to start from>
