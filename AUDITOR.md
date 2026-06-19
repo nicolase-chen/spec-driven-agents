@@ -33,12 +33,13 @@ Auditor does **not**:
 ### Mode B: Post-task review gate (lightweight)
 - Triggered by Architect after each Implementer task completes
 - Runs on a fast/cheap model — existence checks only, no reasoning
-- Reads only: the task sheet, the task log, and the changed-file list / diff
-  (from git). Does NOT follow the full reading order in §2 — that is for Mode C.
+- Reads only: the task sheet and the task log (the task log records the
+  list of files changed by the task). Uses no shell/git access. Does NOT
+  follow the full reading order in §2 — that is for Mode C.
 - Scope (check existence/facts only; do NOT judge design quality):
   - Every test item in the task sheet checklist has a corresponding test (existence only)
   - Test results in the task log show all green
-  - Changed files are all within the task's declared scope — no out-of-scope files
+  - Changed files are all within the task's declared scope — verify against task log's file list
   - Task log is filled (Decisions Made, Open Questions)
 - Conclusion: CLEAN or ESCALATE (this mode does NOT use the §5 PASS/FAIL table)
   - CLEAN → Architect proceeds to the next task (continuous execution)

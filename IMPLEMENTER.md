@@ -193,5 +193,7 @@ stopping and raising a question — it is never a silent decision.
    Full diff and complete test output live in the task log and git history,
    not in the return message.
 6. Record this task's commit range (Base / Head SHA) in the task log Info
-   block so the review gate reads the diff from git instead of a pasted copy.
+   block. Also record in the task log the explicit list of files this task
+   created or modified, so the review gate can verify scope without shell
+   or git access.
 ```
