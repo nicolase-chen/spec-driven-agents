@@ -16,6 +16,10 @@
          — read exactly those files, no more. If the field is empty, read
          the specs referenced in the task sheet.
 5. Create task log: _doc/logs/task-XXX.md
+5.5 Run the existing test suite once and confirm the baseline is green
+    before writing anything. If the baseline already has failures, record
+    them in the task log and report to Architect — do not attribute them to
+    your changes, and do not fix them unless the task says so.
 6. Begin execution
 ```
 
@@ -131,6 +135,11 @@ When your changes create orphans:
 
 Self-check: can every changed line be traced directly to the task sheet?
 
+File scope is a hard boundary, not a guideline. The files you may edit are
+those the task sheet declares (Relevant files / Entry point and what the
+task explicitly requires). Touching anything outside that set requires
+stopping and raising a question — it is never a silent decision.
+
 ### 4.3 Code Style
 
 - All functions must have type hints
@@ -153,6 +162,9 @@ Self-check: can every changed line be traced directly to the task sheet?
 - ❌ Tests that only confirm "no error" without asserting behavior
 - ❌ Hardcoded passwords, keys, or URLs
 - ❌ Raise a question that is already answered in the spec
+- ❌ Edit any file outside the task sheet's declared scope. If the task
+  genuinely needs a file not listed, stop, write to QUESTIONS.md, and
+  terminate — do not edit it silently.
 
 ---
 
