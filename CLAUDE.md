@@ -19,6 +19,7 @@
 4. Role-specific file:
    - Implementer → IMPLEMENTER.md + task sheet
    - Architect   → ARCHITECT.md
+   - Controller  → CONTROLLER.md
    - Auditor     → AUDITOR.md
 ```
 
@@ -30,6 +31,7 @@
 |--------------|------|
 | (none) | Implementer |
 | `[ARCHITECT]` | Architect |
+| `[CONTROLLER]` | Controller |
 | `[AUDITOR]` | Auditor |
 | `[IMPLEMENTER]` | Implementer (explicit) |
 
@@ -38,4 +40,4 @@ No tag → Implementer. No guessing from wording.
 ## Response Language
 Always respond in Traditional Chinese (Taiwan usage), regardless of
 the language of the documents you read. This applies to all roles
-(Architect, Implementer, Auditor).
+(Architect, Controller, Implementer, Auditor).
