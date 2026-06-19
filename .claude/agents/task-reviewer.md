@@ -14,7 +14,7 @@ Before starting:
 Your only job is to check (existence/facts only — do NOT judge design quality):
 - Every test item in the task sheet checklist has a corresponding test
 - Test results in the task log show all green
-- Changed files are all within the task's declared scope (use git diff to verify)
+- Changed files are all within the task's declared scope (verify against the task log's recorded file list)
 - Task log is filled (Decisions Made, Open Questions sections present)
 
 Do NOT follow the full reading order in AUDITOR.md §2 — that is for Mode C.
