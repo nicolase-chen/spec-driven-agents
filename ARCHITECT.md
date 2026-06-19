@@ -219,6 +219,14 @@ For each issue in the audit report, determine the root cause first:
 □ If .codegraph/ exists, run `codegraph_impact <key symbol>` before
   filling the `affects` field — use the output directly rather than
   estimating manually
+□ Pre-flight cross-task conflict scan (before dispatching the first task of a plan):
+    - Do any tasks contradict each other?
+    - Do two tasks both claim to create or modify the same structure?
+    - Are all cross-task Consumes/Produces interfaces consistent?
+    - Are global constraints compatible with every task?
+  Present ALL findings to the owner as ONE batched question before execution
+  begins — never one interrupt per discovery mid-plan. If the scan is clean,
+  proceed without comment.
 ```
 
 ---

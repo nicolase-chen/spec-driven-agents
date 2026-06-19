@@ -268,24 +268,50 @@ Emergency spec correction: wait for current session to end, fix in next session 
 
 ## 6. Audit Trigger Guidelines
 
-Audits are **risk-driven**, not mandatory every round.
+Audits are tiered. Use the lightest tier that fits; escalate only when a
+trigger fires.
 
-| Situation | Recommendation |
-|-----------|---------------|
-| Task sheet references 2+ spec files | ✅ Pre-implementation spec consistency audit |
-| Task has depends_on entries | ✅ Pre-implementation spec consistency audit |
-| Task adds or modifies any API interface | ✅ Pre-implementation spec consistency audit |
-| Task modifies a shared structure used by multiple modules | ✅ Pre-implementation spec consistency audit |
-| None of the above | ⛔ Architect self-check only |
-| New module, model, or API | ✅ Audit |
-| Complex logic (state machine, async, permissions) | ✅ Audit |
-| Implementer task log shows unexpected decisions | ✅ Audit |
-| Implementer raised questions in QUESTIONS.md | Resolve first, then decide |
-| Pure bugfix or minor test addition | ⛔ Skip |
-| Fixing audit-reported implementation gaps | ⛔ Skip |
+### 6.1 Pre-implementation spec consistency check (Mode A)
+Trigger a Mode A check before invoking Implementer when any of these hold:
 
-> Pre-implementation audit scope is limited to spec consistency only — no code review. Use this prompt:
-> `[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation spec consistency check for task-XXX. Verify only: are all references in the task sheet consistent with the cited spec files? Do not review any code.`
+| Situation | Trigger Mode A? |
+|-----------|-----------------|
+| Task sheet references 2+ spec files | ✅ |
+| Task has depends_on entries | ✅ |
+| Task adds or modifies any API interface | ✅ |
+| Task modifies a shared structure used by multiple modules | ✅ |
+| None of the above | ⛔ skip |
 
-Audit report naming: `_doc/audits/audit-<task-id>-<n>.md` (n starts at 1).
+Mode A scope is spec consistency only — no code review. Prompt:
+`[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation spec consistency check for task-XXX. Verify only: are all references in the task sheet consistent with the cited spec files? Do not review any code.`
+
+### 6.2 Post-task review gate (Mode B) — runs after every task
+After each Implementer task completes, Architect dispatches the
+`task-reviewer` agent (AUDITOR.md Mode B). This replaces the old
+"Architect self-check". It is not optional and not skipped for small tasks.
+- CLEAN → proceed to the next task (continuous execution, AGENTS.md §2.5)
+- ESCALATE → trigger a Mode C full audit (§6.3)
+
+### 6.3 Full audit (Mode C)
+Trigger a Mode C four-layer audit when any of these hold:
+
+| Situation | Trigger Mode C? |
+|-----------|-----------------|
+| Mode B gate returned ESCALATE | ✅ |
+| New module, model, or API | ✅ |
+| Complex logic (state machine, async, permissions) | ✅ |
+| Implementer task log shows unexpected decisions | ✅ |
+| Pure bugfix or minor test addition | ⛔ skip |
+| Fixing audit-reported implementation gaps | ⛔ skip |
+
+If Implementer raised questions in QUESTIONS.md, resolve them first, then
+decide.
+
+### 6.4 Final audit (whole feature)
+After all tasks in a plan complete, run one Mode C full audit across the
+whole feature, to catch integration issues that only emerge when tasks are
+assembled. This is in addition to per-task gates.
+
+Audit report naming: `_doc/audits/audit-<task-id>-<n>.md` (Mode C),
+`_doc/audits/review-<task-id>-<n>.md` (Mode B), `_doc/audits/pre-audit-<task-id>-<n>.md` (Mode A); n starts at 1.
 All CRITICAL and WARNING items must be resolved before moving to the next task.
