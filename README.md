@@ -20,10 +20,11 @@ These aren't hallucination problems. They're **governance problems** — no clea
 
 ## How It Works
 
-Three roles. Each with a clear mandate and hard boundaries.
+Four roles. Each with a clear mandate and hard boundaries.
 
 ```
 Architect   — plans, designs specs, breaks down tasks, leads execution
+Controller  — drives a single task's implement→audit loop autonomously, reports DONE or BLOCKED
 Implementer — executes per spec, writes tests first, stops when ambiguous
 Auditor     — independently verifies implementation against spec, no fixes
 ```
@@ -45,6 +46,7 @@ The key rules:
 your-project/
 ├── AGENTS.md              ← Master spec (start here)
 ├── ARCHITECT.md           ← Architect role rules
+├── CONTROLLER.md          ← Controller role rules
 ├── IMPLEMENTER.md         ← Implementer role rules
 ├── AUDITOR.md             ← Auditor role rules
 ├── CLAUDE.md              ← Claude Code entry point
@@ -96,6 +98,7 @@ Each agent is assigned an appropriate model to balance quality and cost:
 | implementer | Haiku | Executes tasks — rule-following, no judgment needed |
 | pre-auditor | Haiku | Spec consistency check before implementation |
 | auditor | Sonnet | Full four-layer audit — requires reasoning |
+| task-reviewer | Haiku | Post-task review gate — existence checks only |
 | explore | Haiku | Codebase exploration, codegraph-aware |
 
 Gemini CLI and Codex use prompt tags directly — subagent configs are Claude Code only.
@@ -130,6 +133,7 @@ All role switching uses explicit tags — no semantic guessing:
 
 ```
 [ARCHITECT]   — planning, spec design, execution lead
+[CONTROLLER]  — drive one task's implement→audit loop to DONE or BLOCKED
 [IMPLEMENTER] — execute task-XXX per spec
 [AUDITOR]     — audit task-XXX against spec
 ```
