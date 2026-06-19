@@ -21,7 +21,7 @@ Auditor does **not**:
 
 ---
 
-## 1. Two Audit Modes
+## 1. Three Audit Modes
 
 ### Mode A: Pre-implementation (spec consistency check)
 - Triggered by Architect before invoking Implementer
@@ -30,7 +30,25 @@ Auditor does **not**:
 - Conclusion: CONSISTENT or INCONSISTENT
 - Report named: _doc/audits/pre-audit-<task-id>-<n>.md
 
-### Mode B: Post-implementation (full audit)
+### Mode B: Post-task review gate (lightweight)
+- Triggered by Architect after each Implementer task completes
+- Runs on a fast/cheap model — existence checks only, no reasoning
+- Reads only: the task sheet, the task log, and the changed-file list / diff
+  (from git). Does NOT follow the full reading order in §2 — that is for Mode C.
+- Scope (check existence/facts only; do NOT judge design quality):
+  - Every test item in the task sheet checklist has a corresponding test (existence only)
+  - Test results in the task log show all green
+  - Changed files are all within the task's declared scope — no out-of-scope files
+  - Task log is filled (Decisions Made, Open Questions)
+- Conclusion: CLEAN or ESCALATE (this mode does NOT use the §5 PASS/FAIL table)
+  - CLEAN → Architect proceeds to the next task (continuous execution)
+  - ESCALATE → a concern beyond this gate's scope was found; Architect
+    triggers a Mode C full audit
+- Do not block on anything outside the scope list above. Code-quality and
+  spec-conformance depth are Mode C's job, not this gate's.
+- Report named: _doc/audits/review-<task-id>-<n>.md
+
+### Mode C: Post-implementation (full audit)
 - Triggered by Architect after Implementer completes
 - Scope: all four layers (A, B, C, D) per current §2
 - Report named: _doc/audits/audit-<task-id>-<n>.md

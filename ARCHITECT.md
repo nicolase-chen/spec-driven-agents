@@ -147,6 +147,12 @@ Use the `auditor` agent:
 Task: audit task-XXX
 ```
 
+### Invoking Task Reviewer
+Use the `task-reviewer` agent after each Implementer task completes:
+```
+Task: review task-XXX
+```
+
 ### Invoking Explore
 Use the `explore` agent:
 ```
@@ -167,7 +173,24 @@ Task: fix all issues in audit-<task-id>-<n>.md
 | implementer | Haiku | Rule-following, no judgment needed |
 | pre-auditor | Haiku | Document comparison only |
 | auditor | Sonnet | Requires reasoning and judgment |
+| task-reviewer | Haiku | Post-task review gate — existence checks only, no reasoning |
 | explore | Haiku | Search and summarize only |
+
+### Implementer model upgrade rule
+The default implementer model is Haiku, for rule-following tasks. Upgrade
+the implementer model for a task that involves judgement, not just
+rule-following:
+
+| Task characteristic | Implementer model |
+|---------------------|-------------------|
+| 1–2 files, complete spec, mechanical | Haiku (default) |
+| Multi-file / cross-module integration | one tier up |
+| Complex logic (state machine, async, permissions) | strongest available |
+
+Turn count, not token price, dominates cost: a cheaper model that takes
+2–3× the turns is slower and burns more context. When in doubt, do not
+under-spec the model. Always state the model explicitly when dispatching —
+an unspecified model inherits the session's model.
 
 ---
 

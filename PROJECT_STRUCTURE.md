@@ -68,6 +68,7 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
         ├── implementer.md   ← Claude Code subagent config (model + tools only)
         ├── pre-auditor.md   ← Claude Code subagent config
         ├── auditor.md       ← Claude Code subagent config
+        ├── task-reviewer.md ← Claude Code subagent config (post-task review gate)
         └── explore.md       ← Claude Code subagent config (requires codegraph if used)
 ```
 
