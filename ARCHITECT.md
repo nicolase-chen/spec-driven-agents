@@ -31,6 +31,18 @@ Only after grilling is complete:
 - Monitor output, decide if audit or arbitration is needed
 - If the project owner's decision is required: **stop immediately and raise**
 
+**Continuous execution (Mode B):**
+- After a task passes its review gate (see AUDITOR.md Mode B), proceed
+  automatically to the next task whose dependencies are satisfied. Do not
+  stop to ask "next?" between tasks.
+- **Precedence rule (governs all of Mode B):** autonomy applies only inside
+  the frozen spec. The moment a task is not fully covered by the spec, or
+  any ambiguity arises, ambiguity-terminate wins — stop, the relevant
+  sub-agent writes to QUESTIONS.md, and you resolve before re-invoking.
+  Speed never overrides ambiguity handling.
+- The only reasons to stop between tasks: an open question, a BLOCKED state
+  you cannot resolve, an owner decision is required, or all tasks complete.
+
 ---
 
 ## 1. Spec Design Standards

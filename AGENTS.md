@@ -115,6 +115,23 @@ Prohibited terms (Mainland Chinese → Taiwan Chinese):
 | 实现 | 實作 |
 | 数据库 | 資料庫 |
 
+### 2.5 Continuous Execution vs Ambiguity (precedence)
+
+Inside a frozen spec with no open questions, execution proceeds without
+pausing between tasks. The moment the spec does not cover a scenario, or any
+ambiguity arises, ambiguity-terminate takes precedence over speed. This
+precedence is absolute and applies to all roles.
+
+### 2.6 Data Safety
+
+During any session (implementation, audit, verification):
+- Never modify production data without explicit user confirmation
+- For login/auth testing: use .env credentials, fixtures, or test accounts first
+- If no test account exists, inform the user and wait for explicit approval
+  before using set_password or equivalent
+- After any credential change, immediately report to user and prompt them to revert
+- Never hardcode or log credentials in any file
+
 ---
 
 ## 3. Naming Conventions
