@@ -315,11 +315,15 @@ Trigger a Mode C four-layer audit when any of these hold:
 If Implementer raised questions in QUESTIONS.md, resolve them first, then
 decide.
 
-### 6.4 Final audit (whole feature)
-After all tasks in a plan complete, run one Mode C full audit across the
-whole feature, to catch integration issues that only emerge when tasks are
-assembled. This is in addition to per-task gates.
+### 6.4 Final audit (whole feature) — Mode D
+After all tasks in a plan complete, the Dispatcher triggers AUDITOR.md
+**Mode D — Final Audit (whole-feature)**:
+- Baseline: all of `_doc/specs/` (latest signed spec), NOT a single module
+- Target: all code in scope, NOT a single task
+- Checks: Coverage (spec clause with no implementing code) and Drift (code that no longer conforms to the latest spec)
+- Report: `_doc/audits/final-audit-<n>.md`
 
 Audit report naming: `_doc/audits/audit-<task-id>-<n>.md` (Mode C),
-`_doc/audits/review-<task-id>-<n>.md` (Mode B), `_doc/audits/pre-audit-<task-id>-<n>.md` (Mode A); n starts at 1.
+`_doc/audits/review-<task-id>-<n>.md` (Mode B), `_doc/audits/pre-audit-<task-id>-<n>.md` (Mode A),
+`_doc/audits/final-audit-<n>.md` (Mode D); n starts at 1.
 All CRITICAL and WARNING items must be resolved before moving to the next task.

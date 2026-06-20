@@ -21,7 +21,7 @@ Auditor does **not**:
 
 ---
 
-## 1. Three Audit Modes
+## 1. Four Audit Modes
 
 ### Mode A: Pre-implementation (spec consistency check)
 - Triggered by Architect before invoking Implementer
@@ -51,12 +51,24 @@ Auditor does **not**:
 
 ### Mode C: Post-implementation (full audit)
 - Triggered by Architect after Implementer completes
-- Scope: all four layers (A, B, C, D) per current §2
+- Scope: all four audit layers (Layer A, Layer B, Layer C, Layer D) per §2
 - Report named: _doc/audits/audit-<task-id>-<n>.md
+
+### Mode D: Final Audit (whole-feature)
+- Triggered by Dispatcher, after all tasks in a plan complete
+- Baseline: all of `_doc/specs/` (latest) — NOT a single "relevant module"
+- Target: all code — NOT a single task
+- Two dedicated checks:
+  - **Coverage**: walk each clause of the final spec; identify which code implements it; a spec clause implemented by no code is a gap
+  - **Drift**: does existing code still conform to the LATEST spec? (not the spec version current when the code was written)
+- Conclusion: PASS/FAIL. FAIL = "a coverage or drift gap exists, pending owner adjudication". Reports facts only; owner makes the final call (CR-40 intact).
+- Report named: `_doc/audits/final-audit-<n>.md` (n starts at 1; NOT task-bound)
 
 ---
 
-## 2. Required Reading Order (must not be reversed)
+## 2. Required Reading Order
+
+### Modes A / B / C — per-task order (must not be reversed)
 
 ```
 Step 1 — Build spec knowledge (read before touching implementation)
@@ -79,6 +91,20 @@ When codegraph is initialized (.codegraph/ exists):
 - Fall back to grep/read only when codegraph returns no results
 
 **Strict requirement: finish all spec reading before reading any implementation.**
+
+### Mode D — Final Audit order (all specs → all code)
+
+```
+Step 1 — Build spec knowledge
+1. AGENTS.md
+2. ALL files under _doc/specs/ (full baseline, not a single module)
+
+Step 2 — Review all code
+3. All source code and tests in scope
+4. _doc/logs/CURRENT_STATE.md
+```
+
+**Strict requirement: read ALL spec files before reading ANY code.**
 
 ---
 
@@ -110,6 +136,11 @@ When codegraph is initialized (.codegraph/ exists):
 - **D1. Task log**: `_doc/logs/task-<id>.md` exists and is correctly formatted?
 - **D2. CURRENT_STATE.md**: Updated? Next step clear?
 - **D3. CURRENT_STATE.md integrity**: Does "Spec files needed" list files that actually exist? Does "Known Pitfalls" reflect issues recorded in the task log? Is "Last verified by" updated to reflect this audit?
+
+### Mode D Checks (Final Audit only — not per-task layers)
+
+- **Mode D-Coverage**: Walk each clause of the final spec; identify which code implements it. A spec clause implemented by no code is a coverage gap.
+- **Mode D-Drift**: For each piece of code in scope, does it conform to the LATEST spec (not the spec as it was when the code was written)? Flag any divergence.
 
 ---
 
@@ -144,11 +175,15 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 | Pass | ✅ PASS | No CRITICAL or WARNING |
 | Fail | 🔴 FAIL | Any CRITICAL or WARNING |
 
-**All issues must be resolved before the current task closes. No "carry to next task".**
+**Modes A / B / C**: All issues must be resolved before the current task closes. No "carry to next task".
+
+**Mode D (Final Audit)**: FAIL means "a coverage or drift gap exists, pending owner adjudication". Facts are reported to the owner, who makes the final arbitration call. Gaps are not auto-blocking — owner decides.
 
 ---
 
 ## 6. Report Format
+
+### Mode C report: `audit-<task-id>-<n>.md`
 
 ```markdown
 # audit-<task-id>-<n>.md
@@ -162,6 +197,35 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 ## Issues
 
 ### <ID> (<Severity>)
+- Location: `<file path>:<line>`
+- Spec reference: `<doc>` §X: "<original text>"
+- Finding: Spec requires X. Implementation does Y.
+
+## Spec Ambiguities (if any)
+<describe contradictions or gaps found in the spec>
+```
+
+### Mode D report: `final-audit-<n>.md`
+
+```markdown
+# final-audit-<n>.md
+
+## Audit Info
+- Scope: whole-feature
+- Auditor: <Claude / Gemini>
+- Date: YYYY-MM-DD
+- Baseline: all of _doc/specs/ (latest)
+- Conclusion: ✅ PASS / 🔴 FAIL (pending owner adjudication if FAIL)
+
+## Coverage Gaps
+
+### <ID> (CRITICAL / WARNING)
+- Spec reference: `<doc>` §X: "<clause text>"
+- Finding: Spec clause implemented by no code.
+
+## Drift Gaps
+
+### <ID> (CRITICAL / WARNING)
 - Location: `<file path>:<line>`
 - Spec reference: `<doc>` §X: "<original text>"
 - Finding: Spec requires X. Implementation does Y.
