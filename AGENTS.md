@@ -10,6 +10,9 @@
 ## Quick Start — Copy the relevant line to begin
 
 ```
+# Explore mode (freeform thinking, no artifacts by default — use before Architect when direction is undecided)
+[EXPLORE] Read AGENTS.md and EXPLORE.md, then explore freely.
+
 # Architect mode (planning + execution lead)
 [ARCHITECT] Read AGENTS.md, confirm index, report current state briefly, then await instructions.
 
@@ -29,6 +32,7 @@
 
 | Role | Spec File | Core Responsibility |
 |------|-----------|-------------------|
+| Explore | `EXPLORE.md` | Freeform thinking mode before Architect's formal process — build context, lay out candidate directions, no binding output |
 | Architect | `ARCHITECT.md` | Requirements, spec design, task breakdown, execution lead, audit trigger |
 | Controller | `CONTROLLER.md` | Drive a single task's implement→audit convergence; decide DONE or BLOCKED |
 | Implementer | `IMPLEMENTER.md` | Implement per task spec, write tests, maintain logs |
@@ -36,12 +40,18 @@
 
 **Role exclusivity: one role per session. No dual roles.**
 
+**Explore is not a workflow role** — it produces no artifacts by default (see
+`EXPLORE.md` §2) and makes no binding decisions. Invoke it before Architect's
+Mode A grilling interview when the requirement direction is still
+undecided; skip it for requirements that are already well-defined.
+
 ---
 
 ## 1. Document Chain
 
 ```
 AGENTS.md                  ← Master spec (this file)
+├── EXPLORE.md             ← Explore mode spec (pre-Architect freeform thinking, no artifacts)
 ├── ARCHITECT.md           ← Architect role spec
 ├── CONTROLLER.md          ← Controller role spec
 ├── IMPLEMENTER.md         ← Implementer role spec
@@ -51,7 +61,8 @@ AGENTS.md                  ← Master spec (this file)
 ├── PROJECT_STRUCTURE.md   ← Project layout and module map (fill per project)
 ├── CONTEXT.md             ← Shared domain language / glossary (fill per project)
 └── _doc/
-    ├── specs/             ← Module specs (maintained by Architect)
+    ├── specs/             ← Module specs (maintained by Architect) — merged baseline
+    │   └── changes/       ← Delta documents (ADDED/MODIFIED/REMOVED); archived after merge
     ├── tasks/             ← Task sheets (maintained by Architect)
     ├── logs/
     │   ├── CURRENT_STATE.md   ← Current project state (update every session end)
@@ -154,15 +165,26 @@ During any session (implementation, audit, verification):
 
 ## 4. Document Lock Rules
 
-**During Implementer execution, the current task's spec docs are frozen.**
+**During Implementer execution, the task's assigned spec delta(s) are frozen.**
+
+Spec changes are delta-based (see ARCHITECT.md § Spec Design Standards ›
+Delta-based change management): `_doc/specs/<module>.md` is the merged
+baseline, and each change is authored as a delta under
+`_doc/specs/changes/<change-id>.md`. Freeze granularity is the delta a task
+was dispatched against, not the whole module spec.
 
 | Document | During Implementer run | Notes |
 |----------|----------------------|-------|
 | `_doc/tasks/<current>.md` | ❌ Frozen | Implementer's sole reference |
-| `_doc/specs/<current module>.md` | ❌ Frozen | Same |
+| `_doc/specs/changes/<assigned delta>.md` | ❌ Frozen | The delta(s) this task was dispatched against |
+| `_doc/specs/<module>.md` (merged baseline) | ✅ Read-only reference | Source of truth for everything not covered by an open delta; not itself locked |
 | `AGENTS.md` and role specs | ✅ Editable | Affects future tasks only |
 | `_doc/logs/CURRENT_STATE.md` | ✅ Editable | Logging use |
-| Other `_doc/specs/*.md` | ✅ Editable | Not a current task dependency |
+| Other `_doc/specs/changes/*.md` (different, non-overlapping delta) | ✅ Editable | Parallel tasks on non-overlapping deltas of the same spec do not block each other |
+
+Two open deltas touching the same spec section is a **conflict** — Architect
+must decide merge order or re-split scope. Implementer must never resolve
+this on its own judgment.
 
 Emergency spec correction: wait for current session to end, fix in next session via audit mechanism.
 

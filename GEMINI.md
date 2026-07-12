@@ -21,6 +21,7 @@
    - Architect   → ARCHITECT.md
    - Controller  → CONTROLLER.md
    - Auditor     → AUDITOR.md
+   - Explore     → EXPLORE.md
 ```
 
 ## Role Detection — Explicit Tags Only
@@ -28,12 +29,15 @@
 | Tag in prompt | Role |
 |--------------|------|
 | (none) | Implementer |
+| `[EXPLORE]` | Explore |
 | `[ARCHITECT]` | Architect |
 | `[CONTROLLER]` | Controller |
 | `[AUDITOR]` | Auditor |
 | `[IMPLEMENTER]` | Implementer (explicit) |
 
 No tag → Implementer. No guessing from wording.
+`[EXPLORE]` → Explore mode (see `EXPLORE.md`): pre-Architect freeform
+thinking, produces no artifact by default.
 
 ## Gemini-Specific: Language Check
 
