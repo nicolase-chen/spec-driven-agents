@@ -12,9 +12,11 @@
 1. Read AGENTS.md
 2. Read _doc/logs/CURRENT_STATE.md
 3. Read _doc/tasks/<task>.md
-4. Read the spec files listed in CURRENT_STATE.md "Spec files needed"
-         — read exactly those files, no more. If the field is empty, read
-         the specs referenced in the task sheet.
+4. Read the spec delta(s) assigned to this task under `_doc/specs/changes/`
+         — read exactly those delta files, no more. If the task predates
+         the delta model or no delta is assigned, fall back to the spec
+         files listed in CURRENT_STATE.md "Spec files needed"; if that field
+         is empty, read the specs referenced in the task sheet.
 5. Create task log: _doc/logs/task-XXX.md
 5.5 Run the existing test suite once and confirm the baseline is green
     before writing anything. If the baseline already has failures, record

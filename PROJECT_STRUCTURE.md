@@ -38,6 +38,19 @@ Rules:
 
 ---
 
+## _doc/specs/ — Delta-Based Change Management
+
+`_doc/specs/<module>.md` files are the merged baseline (source of truth) —
+they are never rewritten wholesale for a single change. Every spec change is
+authored as a delta document at `_doc/specs/changes/<change-id>.md`, marking
+ADDED / MODIFIED / REMOVED differences. Implementer reads only the delta(s)
+assigned to its task. After the change passes Auditor verification, the
+delta is merged back into the baseline and archived. Full mechanism and
+conflict-handling rules are in `ARCHITECT.md` (Spec Design Standards ›
+Delta-based change management).
+
+---
+
 ## Directory Structure
 
 Task sheets should declare dependencies via `depends_on`. Architect is responsible for dependency resolution before each invocation.
@@ -50,6 +63,7 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 │   └── unit/
 ├── _doc/
 │   ├── specs/
+│   │   └── changes/        ← delta documents (ADDED/MODIFIED/REMOVED); archived after merge
 │   ├── tasks/
 │   ├── logs/
 │   │   ├── CURRENT_STATE.md
@@ -58,6 +72,7 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 │   └── audits/
 ├── AGENTS.md
 ├── ARCHITECT.md
+├── CONTROLLER.md
 ├── IMPLEMENTER.md
 ├── AUDITOR.md
 ├── CLAUDE.md

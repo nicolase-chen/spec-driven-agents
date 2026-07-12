@@ -7,15 +7,47 @@
 
 ---
 
+## HARD RULES (read first — no exception)
+
+1. **No implementation before spec approval.** Regardless of project size or
+   how simple the requirement looks, Architect must not dispatch Implementer
+   to perform any implementation action until the project owner has
+   explicitly approved the spec. "This looks simple" is never a valid
+   reason to skip approval.
+2. **Scope triage before detail interview.** During requirements analysis,
+   Architect must first assess scope. If the requirement description spans
+   multiple independent subsystems or feature domains, Architect must stop
+   and propose splitting it into multiple independent specs / sub-projects —
+   stating each sub-project's boundary and dependency order — before diving
+   into the detailed grilling interview (below) for any single subsystem.
+
+---
+
 ## 0. Two Working Modes
 
 ### Mode A: Planning (collaborative with the project owner)
 
+If the requirement direction is still undecided, consider running
+`EXPLORE.md` first to lay out candidate directions before starting the
+grilling interview below.
+
 Before writing any spec, run a **requirements grilling session**:
 
+- Read `CONTEXT.md`'s domain glossary and existing `_doc/specs/` / ADRs
+  before drafting any question. Question wording must use terms already
+  defined in `CONTEXT.md`. If the project owner's wording conflicts with an
+  existing term, clarify the terminology first before continuing with the
+  substantive question.
 - Walk through every branch of the decision tree, one question at a time
 - For each question, provide your recommended answer and wait for confirmation
-- For each term introduced, check if it conflicts with `CONTEXT.md` — if the file doesn't exist yet, create it when the first term is resolved
+- If a question can be answered by exploring the existing codebase (source,
+  config, existing specs), explore it yourself — directly, or by dispatching
+  the `explore` sub-agent — before asking. Do not ask the project owner for
+  information that already exists in the codebase.
+- For each term introduced, check if it conflicts with `CONTEXT.md` — if the
+  file doesn't exist yet, create it when the first term is resolved. When a
+  term needs to be added or corrected during the interview, write it back to
+  `CONTEXT.md` immediately — not batched at the end.
 - Surface edge cases and force precision: "You said 'login' — do you mean password auth, SSH key, or OTP? Those are different things."
 - Do not proceed to spec writing until all branches are resolved
 
@@ -23,7 +55,9 @@ Before proceeding to spec writing, CONTEXT.md must contain at least one resolved
 
 Only after grilling is complete:
 - Produce `_doc/specs/` and `_doc/tasks/` documents
-- Update `CONTEXT.md` with any new terms resolved during the session
+
+(`CONTEXT.md` is already current at this point — it was updated inline
+during the interview, per above, not batched afterward.)
 
 ### Mode B: Execution Lead (autonomous)
 - Read `CURRENT_STATE.md`, determine next step
@@ -69,6 +103,25 @@ PROJECT_STRUCTURE.md spec map. If you cannot write it, merge the spec.
 When codegraph is initialized, use `codegraph_context <task description>`
 to verify cross-module dependencies before finalizing spec boundaries.
 This catches hidden dependencies that manual review may miss.
+
+### Delta-based change management
+
+`_doc/specs/<module>.md` is the merged baseline (source of truth). It is
+never rewritten wholesale for a single change.
+
+- Author every spec change as a delta document at
+  `_doc/specs/changes/<change-id>.md`, marking concrete differences as
+  ADDED / MODIFIED / REMOVED — not a full spec rewrite.
+- Dispatch each task against the specific delta(s) it needs, not the whole
+  module spec. Tasks touching different, non-overlapping parts of the same
+  spec may be dispatched in parallel without blocking each other.
+- Once a task implementing a delta passes Auditor verification, produce the
+  merged baseline version yourself (Architect produces the merge; the
+  project owner or Auditor — AUDITOR.md Layer D4 — confirms it), then
+  archive the delta file.
+- If two open deltas modify the same spec section, that is a conflict.
+  Architect must decide merge order or re-split scope — this is never left
+  to Implementer's judgment.
 
 ### Interface contracts between tasks
 When a task depends on or feeds another task, declare the interface
@@ -247,3 +300,5 @@ For each issue in the audit report, determine the root cause first:
 - ❌ Make spec decisions without updating the corresponding spec file
 - ❌ Ignore open items in QUESTIONS.md
 - ❌ End session without updating CURRENT_STATE.md and session log
+- ❌ Let Implementer decide delta merge order or resolve an overlapping-delta
+  conflict — that decision belongs to Architect only

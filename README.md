@@ -20,9 +20,10 @@ These aren't hallucination problems. They're **governance problems** — no clea
 
 ## How It Works
 
-Four roles. Each with a clear mandate and hard boundaries.
+Four workflow roles, plus an optional pre-planning thinking mode. Each with a clear mandate and hard boundaries.
 
 ```
+Explore     — optional pre-Architect freeform thinking mode, produces no artifact by default
 Architect   — plans, designs specs, breaks down tasks, leads execution
 Controller  — drives a single task's implement→audit loop autonomously, reports DONE or BLOCKED
 Implementer — executes per spec, writes tests first, stops when ambiguous
@@ -45,6 +46,7 @@ The key rules:
 ```
 your-project/
 ├── AGENTS.md              ← Master spec (start here)
+├── EXPLORE.md             ← Explore mode (pre-Architect freeform thinking, no artifacts)
 ├── ARCHITECT.md           ← Architect role rules
 ├── CONTROLLER.md          ← Controller role rules
 ├── IMPLEMENTER.md         ← Implementer role rules
@@ -55,7 +57,8 @@ your-project/
 ├── PROJECT_STRUCTURE.md   ← Project layout (fill per project)
 ├── _doc/
 │   ├── specs/
-│   │   └── example.md         ← Module spec template
+│   │   ├── example.md         ← Module spec template
+│   │   └── changes/           ← Delta documents (ADDED/MODIFIED/REMOVED); archived after merge
 │   ├── tasks/
 │   │   └── example.md         ← Task sheet template
 │   ├── logs/
@@ -132,6 +135,7 @@ codegraph init -i
 All role switching uses explicit tags — no semantic guessing:
 
 ```
+[EXPLORE]     — pre-Architect freeform thinking, no artifact by default
 [ARCHITECT]   — planning, spec design, execution lead
 [CONTROLLER]  — drive one task's implement→audit loop to DONE or BLOCKED
 [IMPLEMENTER] — execute task-XXX per spec

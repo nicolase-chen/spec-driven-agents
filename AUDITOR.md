@@ -136,6 +136,7 @@ Step 2 — Review all code
 - **D1. Task log**: `_doc/logs/task-<id>.md` exists and is correctly formatted?
 - **D2. CURRENT_STATE.md**: Updated? Next step clear?
 - **D3. CURRENT_STATE.md integrity**: Does "Spec files needed" list files that actually exist? Does "Known Pitfalls" reflect issues recorded in the task log? Is "Last verified by" updated to reflect this audit?
+- **D4. Delta merge integrity** (only if this task's spec change was authored as a delta under `_doc/specs/changes/`): does the merged baseline spec (`_doc/specs/<module>.md`) correctly incorporate every ADDED / MODIFIED / REMOVED entry from the delta? Is the delta file archived after merge?
 
 ### Mode D Checks (Final Audit only — not per-task layers)
 
