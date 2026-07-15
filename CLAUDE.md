@@ -41,6 +41,22 @@ No tag → Implementer. No guessing from wording.
 `[EXPLORE]` → Explore mode (see `EXPLORE.md`): pre-Architect freeform
 thinking, produces no artifact by default.
 
+## Slash Command 捷徑
+
+`.claude/commands/` 內建 5 個 slash command，內容完全比照 `AGENTS.md`
+「Quick Start」區塊的固定啟動用語，僅供輸入捷徑用，不改變任何角色行為規則。
+
+| Command | 對應角色檔案 | 用法 |
+|---------|-------------|------|
+| `/explore` | `EXPLORE.md` | `/explore` |
+| `/architect` | `ARCHITECT.md` | `/architect` |
+| `/implementer` | `IMPLEMENTER.md` | `/implementer 003` → 展開為 `execute task-003` |
+| `/auditor` | `AUDITOR.md` | `/auditor 003` → 展開為 `audit task-003` |
+| `/controller` | `CONTROLLER.md` | `/controller 003` → 展開為 `drive the assigned task-003 to DONE or BLOCKED` |
+
+**新增角色時的維護提醒**：先在 `AGENTS.md` Quick Start 區塊新增該角色的固定啟動用語，
+再於 `.claude/commands/<角色小寫名稱>.md` 建立對應 command 檔案並同步更新本表格。
+
 ## Response Language
 Always respond in Traditional Chinese (Taiwan usage), regardless of
 the language of the documents you read. This applies to all roles
