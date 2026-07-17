@@ -111,13 +111,20 @@ Type: DONE
 ```markdown
 ## Controller Report — task-XXX
 Type: BLOCKED
-- Status: blocked
+- Status: BLOCKED
 - Reason: attempt cap reached (CR-01) / spec ambiguity (state which)
 - Try count: 3/3
 - Last audit: audit-XXX-n → FAIL
 - QUESTIONS.md new entry: Q-XXX (<short>)
 - Commit: <sha> (current progress + QUESTIONS, pushed)
 ```
+
+> **Terminal-state token contract:** `Type:` is the sole field an external
+> Dispatcher watcher should parse to determine the outcome. Its value is
+> always exactly `DONE` or `BLOCKED` — uppercase, verbatim, no synonyms. Any
+> other place this token is echoed (e.g. the commit message convention in
+> §6) must reuse the same uppercase spelling, so a case-sensitive watcher
+> matches reliably everywhere the token appears.
 
 ---
 
@@ -162,7 +169,7 @@ Commit message convention:
 feat(task-XXX): implement <short>
 audit(task-XXX): <PASS/FAIL> (Mode B/C)
 fix(task-XXX): address audit findings (try N/3)
-chore(task-XXX): blocked, QUESTIONS raised
+chore(task-XXX): BLOCKED, QUESTIONS raised
 ```
 
 ---
