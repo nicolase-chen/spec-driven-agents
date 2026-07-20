@@ -15,7 +15,7 @@
 |---------------------|--------------------------------|
 | Role behavioral contracts (Controller / Auditor / ...) | Session spawning, scheduling, lifecycle |
 | A single task's convergence loop | Cross-task selection, ordering, deadlock, quota, budget |
-| Terminal-state token contract (`Type: DONE/BLOCKED`) | Parsing that token, deciding what runs next |
+| Outcome token contract (`Type: DONE/BLOCKED/RETRY`) | Parsing that token; re-spawning a fresh Controller on RETRY; deciding what runs next |
 | Git-state authority rules (AGENTS.md §2.7) | Honoring them for anything YOU report |
 
 ## 2. Session input contract (answers "do I pass git status in?")
@@ -43,4 +43,7 @@ Before you report a git- or session-state fact:
 - Trigger AUDITOR.md Mode D (whole-feature final audit) after all tasks complete
   (AGENTS.md §6.4).
 - Re-dispatch a fresh Controller on crash recovery (CONTROLLER.md §7).
+- Re-spawn a fresh Controller on `Type: RETRY` (CONTROLLER.md §1 / §4 CR-02): a RETRY report ends
+  one Controller life but NOT the task — read the token, spawn a new Controller for the same task;
+  it resumes from the checkpoint. Do not treat a RETRY session's termination as task completion.
 - Relay QUESTIONS.md items to the spec owner; never auto-answer (CR-40).

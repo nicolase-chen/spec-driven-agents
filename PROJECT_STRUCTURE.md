@@ -71,20 +71,24 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 │   │   └── task-XXX.md
 │   └── audits/
 ├── AGENTS.md
+├── EXPLORE.md
 ├── ARCHITECT.md
 ├── CONTROLLER.md
 ├── IMPLEMENTER.md
 ├── AUDITOR.md
+├── DISPATCHER_CONTRACT.md
 ├── CLAUDE.md
 ├── GEMINI.md
+├── CONTEXT.md
 ├── PROJECT_STRUCTURE.md
 └── .claude/
-    └── agents/
-        ├── implementer.md   ← Claude Code subagent config (model + tools + pointer body)
-        ├── pre-auditor.md   ← Claude Code subagent config
-        ├── auditor.md       ← Claude Code subagent config
-        ├── task-reviewer.md ← Claude Code subagent config (post-task review gate)
-        └── explore.md       ← Claude Code subagent config (requires codegraph if used)
+    ├── agents/
+    │   ├── implementer.md   ← Claude Code subagent config (model + tools + pointer body)
+    │   ├── pre-auditor.md   ← Claude Code subagent config
+    │   ├── auditor.md       ← Claude Code subagent config
+    │   ├── task-reviewer.md ← Claude Code subagent config (post-task review gate)
+    │   └── explore.md       ← Claude Code subagent config (requires codegraph if used)
+    └── commands/            ← slash-command shortcuts (explore/architect/implementer/auditor/controller)
 ```
 
 **Agent config authoring rule:** an `.claude/agents/*.md` body may only

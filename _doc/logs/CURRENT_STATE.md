@@ -1,18 +1,23 @@
 # CURRENT_STATE.md
 
-## 當前狀態
-- 最後更新：YYYY-MM-DD
-- 進行中 Task：無
-- 整體進度：專案初始化，尚未開始
+## Status
+- Last updated: YYYY-MM-DD
+- Active task: none
+- Overall progress: 專案初始化,尚未開始
+- Last verified by: not yet verified
 
-## 下一個 Session 應執行
+## Active Context
+- Spec files needed: (none yet)
+- Open questions: none
+- Depends on (unresolved): none
+
+## Next Session Should
 Confirm requirements with project owner, create first spec.
 
-## 待解問題
-無
+## Known Pitfalls
+none
 
-## 重要決定記錄
-
-| 日期 | 決定內容 | 決定者 |
-|------|---------|--------|
+## Decision Log
+| Date | Decision | By |
+|------|----------|----|
 | (fill in) | Project initialized | Owner |

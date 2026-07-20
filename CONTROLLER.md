@@ -3,8 +3,9 @@
 
 > Controller is a single-task convergence driver.
 > It is dispatched by an external Dispatcher (a human, a CI pipeline, or another agent)
-> with exactly one task, drives that task's implement→audit loop to completion,
-> reports the outcome, and terminates.
+> with exactly one task, drives ONE attempt of that task's implement→audit loop,
+> reports the outcome (DONE / BLOCKED / RETRY), and terminates. On RETRY the Dispatcher
+> re-spawns a fresh Controller for the same task, so each attempt runs in its own context.
 > Controller does not design specs, does not select tasks, does not track cross-task progress.
 > The Dispatcher — whoever schedules Controller and decides what runs next — is outside
 > this framework's scope; only Controller's own behavior is defined here.
@@ -16,7 +17,7 @@
 | Role | Lifecycle | Scope |
 |------|-----------|-------|
 | Dispatcher (external) | persistent | Whole task graph; decides what Controller runs next. Out of framework scope. |
-| Controller | single task, one life | The one assigned task |
+| Controller | one attempt, one life | One attempt of the assigned task (re-spawned per attempt on RETRY) |
 | subagent (Implementer / Auditor) | single invocation | One implement or one audit |
 
 Controller inherits all governance constraints in AGENTS.md, ARCHITECT.md, and AUDITOR.md,
@@ -33,14 +34,26 @@ change task scope, does not relax any lock.
 
 **Input:** the Dispatcher assigns exactly one `task-XXX`.
 
-**Job:** dispatch Implementer, dispatch Auditor, and drive the implement → audit → (fix on FAIL)
-loop for that single task until it converges.
+**Job:** drive ONE attempt of that task's implement → audit loop: dispatch Implementer, dispatch
+Auditor, then report the outcome. A passing audit ends the task (DONE); an unresolvable state ends
+it (BLOCKED); a fixable audit FAIL below the cap hands off to a fresh Controller (RETRY). Across
+re-spawns the attempts converge the task.
 
-**Two terminations (report once, then end the session):**
+**Per-attempt lifecycle:** each attempt runs in a fresh Controller context. A Controller life
+drives exactly one attempt of the implement→audit loop, then reports one of three outcomes and
+ends. `try_count` persists in a checkpoint (§4 CR-02), read at session start, so the next fresh
+Controller knows which attempt it is. This bounds context: no single Controller accumulates more
+than one attempt's transcript.
 
-1. **DONE** — audit passes → commit + push → report DONE → end.
-2. **BLOCKED** — attempt cap reached (CR-01), or Implementer/Auditor reports a spec ambiguity →
-   write QUESTIONS.md → commit + push (current progress + QUESTIONS) → report BLOCKED → end.
+**Three outcomes (report once, then end the session):**
+
+1. **DONE** (terminal) — audit passes → commit + push → report DONE → end.
+2. **BLOCKED** (terminal) — attempt cap reached (CR-01), or Implementer/Auditor reports a spec
+   ambiguity → write QUESTIONS.md → commit + push (current progress + QUESTIONS) → report BLOCKED → end.
+3. **RETRY** (non-terminal) — audit FAILed on an implementation gap, or the Implementer result was
+   abnormal, and `try_count` has not reached the cap → write checkpoint → commit + push (progress +
+   checkpoint) → report RETRY → end. The Dispatcher re-spawns a fresh Controller for the same task,
+   which reads the checkpoint and continues from the recorded `try_count`.
 
 **Boundaries (never cross):** do not select another task, do not check quota, do not detect
 cross-task deadlock, do not touch spec/task scope.
@@ -50,18 +63,22 @@ cross-task deadlock, do not touch spec/task scope.
 ## 2. Single-Task Execution Flow
 
 ```
-Controller session start (assigned task-XXX)
+Controller session start (assigned task-XXX — one attempt)
 │
 ├── 1. Read AGENTS.md + CONTROLLER.md
 ├── 2. Read task-XXX.md + the spec files it cites (only what this task needs)
+├── 2b. Read the checkpoint if present (§4 CR-02): recover try_count and the last audit
+│       reference. No checkpoint ⇒ this is attempt 1. Read only the LATEST audit report,
+│       never prior attempts' transcripts — context stays bounded to one attempt.
 │
-├── 3. Dispatch Implementer
+├── 3. Dispatch Implementer  (per checkpoint's "next action": redo, or fix last audit findings)
 │   ├── dispatch (model per ARCHITECT.md)
 │   ├── wait; receive thin status line (lossless relay)
 │   ├── done → read task log; confirm tests green and files within scope; verify committed + clean via live git (CR-50) → go to 4
 │   ├── stopped on ambiguity + new QUESTIONS entry → terminate BLOCKED
-│   ├── log abnormal / abnormal termination → count toward try_count, re-dispatch
-│   └── try_count reaches 3 (CR-01) → terminate BLOCKED
+│   └── log abnormal / abnormal termination / CR-50 gate fail
+│         → try_count += 1; reaches 3 (CR-01) → terminate BLOCKED
+│                          else → write checkpoint → terminate RETRY
 │
 ├── 4. Dispatch Auditor  (record audited HEAD, CR-51)
 │   ├── default Mode B (task-reviewer gate): CLEAN / ESCALATE
@@ -72,20 +89,28 @@ Controller session start (assigned task-XXX)
 │
 ├── 5. Handle audit result
 │   ├── CLEAN (Mode B) / PASS (Mode C) → verify HEAD unchanged (CR-52) → terminate DONE
-│   ├── ESCALATE (Mode B) → escalate to Mode C (back to 4)
+│   ├── ESCALATE (Mode B) → escalate to Mode C in this same life (same committed state,
+│   │       not a new attempt, no try_count change) → back to 4
 │   ├── FAIL (Mode C)
 │   │   ├── try_count += 1; reaches 3 → terminate BLOCKED
-│   │   ├── implementation gap → re-dispatch Implementer to fix the audit issue
-│   │   │   (no new task sheet) → back to 3
+│   │   ├── implementation gap → write checkpoint ("fix last audit findings", no new task sheet)
+│   │   │       → terminate RETRY
 │   │   └── Auditor reports spec ambiguity → terminate BLOCKED
 │   └── uncertain → terminate BLOCKED
 │
-└── Terminate: commit + push + report per termination type → end session
+└── Terminate per outcome:
+     DONE    → delete checkpoint → commit + push → report DONE
+     BLOCKED → delete checkpoint → write QUESTIONS + commit + push → report BLOCKED
+     RETRY   → write checkpoint → commit + push (progress + checkpoint) → report RETRY
+    → end session   (RETRY: the Dispatcher re-spawns a fresh Controller for the same task)
 ```
 
 `try_count` is a single counter covering all retries (log abnormal, abnormal termination,
-audit FAIL), per CR-01 "regardless of cause". Short-lived process — count in memory, no
-checkpoint file.
+audit FAIL), per CR-01 "regardless of cause". Because each attempt runs in a fresh Controller
+context (§1), the counter cannot live in memory — it is persisted in the checkpoint (§4 CR-02)
+and read at session start (step 2b). Each RETRY increments it; the next fresh Controller resumes
+from the persisted value. A within-life Mode B→C escalation is not a new attempt and does not
+increment it.
 
 ---
 
@@ -119,12 +144,27 @@ Type: BLOCKED
 - Commit: <sha> (current progress + QUESTIONS, pushed)
 ```
 
-> **Terminal-state token contract:** `Type:` is the sole field an external
-> Dispatcher watcher should parse to determine the outcome. Its value is
-> always exactly `DONE` or `BLOCKED` — uppercase, verbatim, no synonyms. Any
-> other place this token is echoed (e.g. the commit message convention in
-> §6) must reuse the same uppercase spelling, so a case-sensitive watcher
-> matches reliably everywhere the token appears.
+### RETRY report (non-terminal)
+
+```markdown
+## Controller Report — task-XXX
+Type: RETRY
+- Status: retry pending
+- Reason: audit FAIL, implementation gap (or: Implementer abnormal / CR-52 drift)
+- Try count: N/3 (checkpoint written)
+- Last audit: audit-XXX-n → FAIL   // or "n/a" for a pre-audit abnormal result
+- Next: fresh Controller will <fix last audit findings | redo Implementer | re-audit HEAD>
+- Commit: <sha> (progress + checkpoint, pushed)
+```
+
+> **Outcome token contract:** `Type:` is the sole field an external Dispatcher
+> watcher parses to determine the outcome. Its value is always exactly one of
+> `DONE`, `BLOCKED`, or `RETRY` — uppercase, verbatim, no synonyms. `DONE` and
+> `BLOCKED` are terminal (the task is finished); `RETRY` is non-terminal — it
+> instructs the Dispatcher to re-spawn a fresh Controller for the same task
+> (§4 CR-02). Any other place a token is echoed (e.g. the commit message
+> convention in §6) must reuse the same uppercase spelling, so a case-sensitive
+> watcher matches reliably everywhere the token appears.
 
 ---
 
@@ -139,6 +179,26 @@ On reaching the cap → terminate BLOCKED, write QUESTIONS.md.
 > at task breakdown or the Mode A pre-check. Hitting the cap is "an upstream problem surfacing
 > late", and handing it back is correct. **Task sizing and budget are the Dispatcher's concern,
 > not Controller's.**
+>
+> **Convergence note:** measurable progress across attempts (each round narrowing the failure —
+> e.g. a fault localized down to a single parameter) does NOT extend the cap. Whether a task is
+> "converging" is a subjective judgment the framework deliberately keeps out of the agent's hands.
+> On reaching 3/3, hand back with the narrowed diagnosis recorded in QUESTIONS.md — that is the
+> intended outcome, not a limitation of the cap.
+
+### CR-02 Attempt checkpoint (enables fresh-context-per-attempt)
+Because each attempt runs in a fresh Controller context (§1), cross-attempt state must live on
+disk, not in memory. On every RETRY, before ending, the Controller writes a checkpoint recording:
+- `try_count` — attempts used so far
+- the last audit report reference (e.g. `audit-XXX-2`) and its outcome
+- the next action for the fresh Controller: `fix last audit findings` / `redo Implementer` / `re-audit HEAD`
+
+Location: `_doc/logs/controller-<task-id>.checkpoint.md` (under `_doc/logs/`, which the Controller
+may write — not a frozen doc). It is committed and pushed with the RETRY so the fresh Controller
+reads it from disk (step 2b). On DONE or BLOCKED (terminal), the Controller deletes the checkpoint —
+the task is finished and must not resume. The Controller never adopts an abnormal Implementer's
+uncommitted tree (CR-50); on the abnormal path the checkpoint records `redo Implementer` and only
+the checkpoint (plus any already-committed progress) is committed.
 
 ---
 
@@ -148,7 +208,7 @@ On reaching the cap → terminate BLOCKED, write QUESTIONS.md.
   `audit: full` / after Mode B ESCALATE / task previously FAILed.
 - **CR-31 Task-level audit only.** Controller audits the single task it owns. A whole-feature
   final audit across tasks is not Controller's job — it belongs to whoever owns cross-task
-  completion (the Dispatcher).
+  completion (the Dispatcher in autonomous execution, or the Architect in manual execution).
 - **CR-32 No relay.** Never paste Implementer output/explanation into the audit prompt; the
   Auditor runs as a fresh session reading only spec and files.
 - **CR-33 batch-audit off.** Always audit per task.
@@ -160,6 +220,7 @@ On reaching the cap → terminate BLOCKED, write QUESTIONS.md.
 - **DONE** → commit + push.
 - **BLOCKED** → commit + push (current progress + QUESTIONS.md, so the owner sees context before
   arbitrating).
+- **RETRY** → commit + push (progress + checkpoint, so the fresh Controller resumes from disk).
 - Subagents (Implementer / Auditor) **commit only**; Controller performs the push.
 - A secret-scanning gate before push is a deployment-level policy, not part of Controller's
   mandate, and is not assumed here.
@@ -169,6 +230,7 @@ Commit message convention:
 feat(task-XXX): implement <short>
 audit(task-XXX): <PASS/FAIL> (Mode B/C)
 fix(task-XXX): address audit findings (try N/3)
+retry(task-XXX): audit FAIL, checkpoint written (try N/3)
 chore(task-XXX): BLOCKED, QUESTIONS raised
 ```
 
@@ -185,17 +247,19 @@ from live git at the moment of the check — never from an injected environment 
   uncommitted". The Auditor reads files on disk, so this gate is what makes
   "what the Auditor audits == the committed state" hold. If the gate fails (the
   Implementer left the tree dirty/uncommitted, contrary to §6 and IMPLEMENTER.md
-  §6), treat it as an abnormal Implementer result: log abnormal, count toward
-  `try_count`, and re-dispatch the Implementer (§2 flow). Controller does not
-  commit on the Implementer's behalf.
+  §6), treat it as an abnormal Implementer result: log abnormal, increment
+  `try_count`, and — at the cap → terminate BLOCKED, else → write checkpoint
+  (`redo Implementer`) and terminate RETRY, so a fresh Controller re-dispatches
+  the Implementer (§2 flow). Controller does not commit on the Implementer's behalf.
 - **CR-51 — Record the audited commit.** At Auditor dispatch, record the audited
   HEAD (`git rev-parse HEAD`). The Auditor does not record it (git-agnostic);
   the `audit-<id>-<n>` ⇄ SHA association lives in the Controller report's
   `Commit:` field. After CR-52, this recorded SHA equals the pushed SHA.
 - **CR-52 — Pre-push drift gate.** On PASS, before push, re-verify with live git
   that HEAD still equals the SHA recorded at CR-51. If HEAD moved since dispatch,
-  the audit is stale — do not report DONE on it: re-audit the current HEAD
-  (counts toward `try_count`, CR-01); if that reaches the cap, terminate BLOCKED.
+  the audit is stale — do not report DONE on it: increment `try_count` (CR-01);
+  at the cap → terminate BLOCKED, else → write checkpoint (`re-audit HEAD`) and
+  terminate RETRY, so a fresh Controller re-audits the current HEAD.
   This closes the audit→push timing gap; the external orchestrator is out of
   scope and cannot be assumed concurrency-free.
 
@@ -209,6 +273,7 @@ from live git at the moment of the check — never from an injected environment 
 | Quota / time budget | Dispatcher |
 | Whole-feature final audit after all tasks complete | Dispatcher |
 | Crash recovery | Dispatcher re-dispatches a fresh Controller for the task |
+| Re-spawn a fresh Controller on `Type: RETRY` (per-attempt lifecycle, §1 / §4 CR-02) | Dispatcher |
 | Secret-scan-before-push (optional) | Deployment policy |
 
 No CONTROL/stop mechanism exists: Controller is single-task and short-lived; to halt, the
@@ -290,8 +355,10 @@ Respond in Traditional Chinese (Taiwan usage).
 ```
 Goal: run the implement→audit convergence for task-XXX.
 The project is in a working directory; pull latest first.
-You are the Controller: dispatch Implementer + Auditor, drive task-XXX to DONE or BLOCKED.
-On DONE: push and report DONE. On BLOCKED: write QUESTIONS, push, report BLOCKED. Then end.
+You are the Controller: dispatch Implementer + Auditor, drive ONE attempt of task-XXX.
+On DONE: push and report DONE. On BLOCKED: write QUESTIONS, push, report BLOCKED.
+On a fixable audit FAIL below the cap: write checkpoint, push, report RETRY (I will re-spawn a
+fresh Controller for the same task, resuming from the checkpoint). Then end.
 Do not select other tasks, do not check quota, do not manage overall progress.
 Read CONTROLLER.md before starting.
 Respond in Traditional Chinese (Taiwan usage).

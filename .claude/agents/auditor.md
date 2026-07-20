@@ -1,6 +1,6 @@
 ---
 name: auditor
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 description: Audit agent per AUDITOR.md. Default: Mode C four-layer post-implementation audit (audit-<task-id>-<n>.md). If dispatch prompt specifies Final Audit (Mode D), runs whole-feature coverage + drift check instead (final-audit-<n>.md).
 tools: Read, Glob, Grep
 ---

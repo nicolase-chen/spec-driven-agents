@@ -51,6 +51,7 @@ your-project/
 ├── CONTROLLER.md          ← Controller role rules
 ├── IMPLEMENTER.md         ← Implementer role rules
 ├── AUDITOR.md             ← Auditor role rules
+├── DISPATCHER_CONTRACT.md ← Orchestrator ⇄ framework contract (external Dispatcher's obligations)
 ├── CLAUDE.md              ← Claude Code entry point
 ├── GEMINI.md              ← Gemini CLI entry point
 ├── CONTEXT.md             ← Shared domain language / glossary
@@ -67,7 +68,8 @@ your-project/
 │   │   └── task-XXX.md        ← Execution logs
 │   └── audits/                ← Audit reports (Auditor produces)
 └── .claude/
-    └── agents/            ← Claude Code subagent configs (model + tools)
+    ├── agents/            ← Claude Code subagent configs (model + tools)
+    └── commands/          ← slash-command shortcuts (explore/architect/implementer/auditor/controller)
 ```
 
 ---

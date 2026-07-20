@@ -71,7 +71,7 @@ Auditor never touches git and never reasons about git state:
 - Report named: _doc/audits/audit-<task-id>-<n>.md
 
 ### Mode D: Final Audit (whole-feature)
-- Triggered by Dispatcher, after all tasks in a plan complete
+- Triggered by the executor (Architect in manual execution, Dispatcher in autonomous), after all tasks in a plan complete
 - Baseline: all of `_doc/specs/` (latest) — NOT a single "relevant module"
 - Target: all code — NOT a single task
 - Two dedicated checks:
@@ -163,13 +163,13 @@ Step 2 — Review all code
 
 ## 4. Reporting Standards
 
-### 3.1 State facts only — no code patches
+### 4.1 State facts only — no code patches
 
 Format: "Spec requires X. Implementation does Y." Expected and actual values may be described freely.
 
 **Never provide**: code fixes, implementation snippets, or patches of any kind.
 
-### 3.2 Issue format
+### 4.2 Issue format
 
 | Field | Description |
 |-------|-------------|
@@ -179,7 +179,7 @@ Format: "Spec requires X. Implementation does Y." Expected and actual values may
 | Spec reference | Section and original text from spec doc |
 | Finding | "Spec requires X. Implementation does Y." |
 
-### 3.3 Ambiguous spec
+### 4.3 Ambiguous spec
 
 List as a separate "Spec Ambiguities" section at the end of the report. Describe only — Architect arbitrates.
 

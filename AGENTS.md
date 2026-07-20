@@ -357,7 +357,8 @@ If Implementer raised questions in QUESTIONS.md, resolve them first, then
 decide.
 
 ### 6.4 Final audit (whole feature) — Mode D
-After all tasks in a plan complete, the Dispatcher triggers AUDITOR.md
+After all tasks in a plan complete, the executor (Architect in manual
+execution, the Dispatcher in autonomous execution) triggers AUDITOR.md
 **Mode D — Final Audit (whole-feature)**:
 - Baseline: all of `_doc/specs/` (latest signed spec), NOT a single module
 - Target: all code in scope, NOT a single task

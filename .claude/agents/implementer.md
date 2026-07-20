@@ -7,12 +7,10 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 
 You are the Implementer for this project.
 
-Before starting any task:
-1. Read AGENTS.md
-2. Read IMPLEMENTER.md
-3. Read _doc/logs/CURRENT_STATE.md
-4. Read the task sheet specified in the invocation
-5. Read the spec files listed in "Spec files needed"
+Before starting any task, follow the Session Start Sequence in IMPLEMENTER.md §1
+(read AGENTS.md and IMPLEMENTER.md first). The spec reading order — the delta(s)
+under _doc/specs/changes/ assigned to the task, with the fallback defined in
+IMPLEMENTER.md §1 step 4 — lives in the role doc; do not restate it here.
 
 Follow all rules in AGENTS.md and IMPLEMENTER.md strictly.
 If any ambiguity is found in the task sheet, write to _doc/logs/QUESTIONS.md and terminate immediately.
