@@ -58,12 +58,12 @@ Controller session start (assigned task-XXX)
 ├── 3. Dispatch Implementer
 │   ├── dispatch (model per ARCHITECT.md)
 │   ├── wait; receive thin status line (lossless relay)
-│   ├── done → read task log; confirm tests green and files within scope → go to 4
+│   ├── done → read task log; confirm tests green and files within scope; verify committed + clean via live git (CR-50) → go to 4
 │   ├── stopped on ambiguity + new QUESTIONS entry → terminate BLOCKED
 │   ├── log abnormal / abnormal termination → count toward try_count, re-dispatch
 │   └── try_count reaches 3 (CR-01) → terminate BLOCKED
 │
-├── 4. Dispatch Auditor
+├── 4. Dispatch Auditor  (record audited HEAD, CR-51)
 │   ├── default Mode B (task-reviewer gate): CLEAN / ESCALATE
 │   ├── force Mode C (CR-30): core security logic / cross-module / task sheet marked
 │   │   `audit: full` / after Mode B ESCALATE / task previously FAILed
@@ -71,7 +71,7 @@ Controller session start (assigned task-XXX)
 │   └── batch-audit always off (CR-33)
 │
 ├── 5. Handle audit result
-│   ├── CLEAN (Mode B) / PASS (Mode C) → terminate DONE
+│   ├── CLEAN (Mode B) / PASS (Mode C) → verify HEAD unchanged (CR-52) → terminate DONE
 │   ├── ESCALATE (Mode B) → escalate to Mode C (back to 4)
 │   ├── FAIL (Mode C)
 │   │   ├── try_count += 1; reaches 3 → terminate BLOCKED
@@ -172,6 +172,33 @@ fix(task-XXX): address audit findings (try N/3)
 chore(task-XXX): BLOCKED, QUESTIONS raised
 ```
 
+### Git-state handling (CR-50/51/52 — git-state authority)
+
+Controller is the only in-task role that queries or asserts git state, and only
+from live git at the moment of the check — never from an injected environment /
+`gitStatus` snapshot, never from memory (AGENTS.md §2.7).
+
+- **CR-50 — Pre-audit commit gate.** Before dispatching the Auditor, verify with
+  live git that the Implementer's output is committed and the working tree is
+  clean (`git status --porcelain` empty). Never dispatch the Auditor on a dirty
+  or uncommitted tree — this is the active form of §10's "no subagent while
+  uncommitted". The Auditor reads files on disk, so this gate is what makes
+  "what the Auditor audits == the committed state" hold. If the gate fails (the
+  Implementer left the tree dirty/uncommitted, contrary to §6 and IMPLEMENTER.md
+  §6), treat it as an abnormal Implementer result: log abnormal, count toward
+  `try_count`, and re-dispatch the Implementer (§2 flow). Controller does not
+  commit on the Implementer's behalf.
+- **CR-51 — Record the audited commit.** At Auditor dispatch, record the audited
+  HEAD (`git rev-parse HEAD`). The Auditor does not record it (git-agnostic);
+  the `audit-<id>-<n>` ⇄ SHA association lives in the Controller report's
+  `Commit:` field. After CR-52, this recorded SHA equals the pushed SHA.
+- **CR-52 — Pre-push drift gate.** On PASS, before push, re-verify with live git
+  that HEAD still equals the SHA recorded at CR-51. If HEAD moved since dispatch,
+  the audit is stale — do not report DONE on it: re-audit the current HEAD
+  (counts toward `try_count`, CR-01); if that reaches the cap, terminate BLOCKED.
+  This closes the audit→push timing gap; the external orchestrator is out of
+  scope and cannot be assumed concurrency-free.
+
 ---
 
 ## 7. Delegated to the Dispatcher (out of Controller scope)
@@ -254,7 +281,7 @@ Respond in Traditional Chinese (Taiwan usage).
 - ❌ Dispatch multiple subagents at once (single-threaded)
 - ❌ Relay Implementer output into the Auditor prompt (CR-32)
 - ❌ Modify or add task scope (CR-41)
-- ❌ Dispatch a subagent while state is uncommitted
+- ❌ Dispatch a subagent while state is uncommitted (enforced actively by CR-50)
 
 ---
 

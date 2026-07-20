@@ -56,6 +56,7 @@ AGENTS.md                  ← Master spec (this file)
 ├── CONTROLLER.md          ← Controller role spec
 ├── IMPLEMENTER.md         ← Implementer role spec
 ├── AUDITOR.md             ← Auditor role spec
+├── DISPATCHER_CONTRACT.md ← Orchestrator ⇄ framework contract (external Dispatcher is out of scope; only its obligations are defined)
 ├── CLAUDE.md              ← Claude Code supplements
 ├── GEMINI.md              ← Gemini supplements
 ├── PROJECT_STRUCTURE.md   ← Project layout and module map (fill per project)
@@ -147,6 +148,24 @@ During any session (implementation, audit, verification):
   before using set_password or equivalent
 - After any credential change, immediately report to user and prompt them to revert
 - Never hardcode or log credentials in any file
+
+### 2.7 Git-state authority (live-git-only)
+
+Any claim about git state — a commit exists, the working tree is clean, a push
+succeeded, what HEAD is — must be derived from a live git command at the moment
+of the decision. Never treat an injected environment / `gitStatus` snapshot
+(e.g. the status block in a session's opening system reminder) as current: it is
+frozen when the session starts and goes stale the instant anything is committed.
+Never assert git state from conversation memory.
+
+Role division:
+- **Auditor** is git-agnostic: it makes no git-state claim at all (AUDITOR.md
+  §0). Its evidence is files on disk (read live) and the spec/task/log docs.
+- **Controller** is the git-state authority within a task: it verifies commit,
+  cleanliness, and HEAD with live git (CONTROLLER.md §6, CR-50/51/52).
+- The **external Dispatcher / orchestrator** is out of framework scope, but the
+  same rule binds it by contract for any git- or session-state it reports
+  (see DISPATCHER_CONTRACT.md).
 
 ---
 

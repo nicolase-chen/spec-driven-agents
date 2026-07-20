@@ -19,6 +19,20 @@ Auditor does **not**:
 - Rationalize deviations on the implementer's behalf
 - Provide fix directions or solutions
 
+### Git-agnostic
+
+Auditor never touches git and never reasons about git state:
+- Your evidence is the files on disk (read live via Read) and the spec / task /
+  log documents. Never git.
+- Never make any finding about commit existence, working-tree cleanliness, or
+  push status. Whether the audited state is committed is the Controller's
+  responsibility, verified with live git before you were dispatched
+  (CONTROLLER.md §6, CR-50).
+- Never treat an injected environment / git-status snapshot (e.g. a `gitStatus`
+  block in a system reminder) as current truth. It is frozen at spawn and
+  predates the state you are auditing; the files you Read are always live and
+  authoritative — the snapshot is not. (Universal rule: AGENTS.md §2.7.)
+
 ---
 
 ## 1. Four Audit Modes
@@ -34,7 +48,9 @@ Auditor does **not**:
 - Triggered by Architect after each Implementer task completes
 - Runs on a fast/cheap model — existence checks only, no reasoning
 - Reads only: the task sheet and the task log (the task log records the
-  list of files changed by the task). Uses no shell/git access. Does NOT
+  list of files changed by the task). Uses no shell/git access, and never
+  treats an injected environment / `gitStatus` snapshot as current (AGENTS.md
+  §2.7). Does NOT
   follow the full reading order in §2 — that is for Mode C.
 - Scope (check existence/facts only; do NOT judge design quality):
   - Every test item in the task sheet checklist has a corresponding test (existence only)
@@ -245,3 +261,5 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 - ❌ Re-interpret the spec after reading the implementation
 - ❌ Provide any code fixes, implementation snippets, or patches
 - ❌ Mark any issue as "can carry to next task"
+- ❌ Make any finding about git commit, working-tree, or push state — git-agnostic; that is the Controller's domain (§0, AGENTS.md §2.7)
+- ❌ Treat an injected environment / gitStatus snapshot as the live repository state (§0, AGENTS.md §2.7)
