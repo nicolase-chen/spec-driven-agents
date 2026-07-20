@@ -1,0 +1,5 @@
+# Framework-maintenance reference material (deployment-specific ops
+# observations, raw notes). NOT part of the distributable template —
+# this repo is cloned wholesale and pushed to a public remote, so ref/
+# must never be tracked.
+ref/
