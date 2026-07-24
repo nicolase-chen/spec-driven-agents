@@ -48,8 +48,12 @@ than one attempt's transcript.
 **Three outcomes (report once, then end the session):**
 
 1. **DONE** (terminal) — audit passes → commit + push → report DONE → end.
-2. **BLOCKED** (terminal) — attempt cap reached (CR-01), or Implementer/Auditor reports a spec
-   ambiguity → write QUESTIONS.md → commit + push (current progress + QUESTIONS) → report BLOCKED → end.
+2. **BLOCKED** (terminal) — carries a machine-readable `Blocked-reason` (§3): `needs-replan`
+   (attempt cap reached on a remediable finding, a structurally-unsatisfiable decomposition, or a
+   task sheet that fails the existence pre-flight) → handed to a fresh Architect via the Dispatcher
+   to re-decompose (§7, ARCHITECT.md §9); or `spec-ambiguity` (Implementer/Auditor reports a spec
+   ambiguity or criterion defect) → write QUESTIONS.md for owner arbitration (CR-40). Commit + push
+   (current progress [+ QUESTIONS]) → report BLOCKED → end.
 3. **RETRY** (non-terminal) — audit FAILed on an implementation gap, or the Implementer result was
    abnormal, and `try_count` has not reached the cap → write checkpoint → commit + push (progress +
    checkpoint) → report RETRY → end. The Dispatcher re-spawns a fresh Controller for the same task,
@@ -70,6 +74,10 @@ Controller session start (assigned task-XXX — one attempt)
 ├── 2b. Read the checkpoint if present (§4 CR-02): recover try_count and the last audit
 │       reference. No checkpoint ⇒ this is attempt 1. Read only the LATEST audit report,
 │       never prior attempts' transcripts — context stays bounded to one attempt.
+├── 2c. On attempt 1 only (no checkpoint): dispatch the pre-auditor existence pre-flight
+│       (AUDITOR.md Mode A). INCONSISTENT ⇒ the task sheet is structurally wrong (missing /
+│       mismatched files, or a Produces already delivered) → terminate BLOCKED, reason
+│       `needs-replan`, do NOT spawn the Implementer. On RETRY the checkpoint exists ⇒ skip.
 │
 ├── 3. Dispatch Implementer  (per checkpoint's "next action": redo, or fix last audit findings)
 │   ├── dispatch (model per ARCHITECT.md)
@@ -91,16 +99,23 @@ Controller session start (assigned task-XXX — one attempt)
 │   ├── CLEAN (Mode B) / PASS (Mode C) → verify HEAD unchanged (CR-52) → terminate DONE
 │   ├── ESCALATE (Mode B) → escalate to Mode C in this same life (same committed state,
 │   │       not a new attempt, no try_count change) → back to 4
-│   ├── FAIL (Mode C)
-│   │   ├── try_count += 1; reaches 3 → terminate BLOCKED
-│   │   ├── implementation gap → write checkpoint ("fix last audit findings", no new task sheet)
-│   │   │       → terminate RETRY
-│   │   └── Auditor reports spec ambiguity → terminate BLOCKED
-│   └── uncertain → terminate BLOCKED
+│   ├── FAIL (Mode C) → route on the Auditor's convergence class (AUDITOR.md §4.4):
+│   │   ├── remediable, try_count < 3 → try_count += 1 → write checkpoint
+│   │   │       ("fix last audit findings", no new task sheet) → terminate RETRY
+│   │   ├── remediable, try_count reaches 3 → terminate BLOCKED, reason `needs-replan`
+│   │   ├── structurally-unsatisfiable (decomposition) → terminate BLOCKED, reason
+│   │   │       `needs-replan` immediately — do NOT spend further attempts (short-circuit)
+│   │   └── criterion-defect / spec-ambiguity → terminate BLOCKED, reason `spec-ambiguity`
+│   │           immediately — do NOT spend further attempts
+│   └── uncertain → terminate BLOCKED, reason `spec-ambiguity`
 │
 └── Terminate per outcome:
      DONE    → delete checkpoint → commit + push → report DONE
-     BLOCKED → delete checkpoint → write QUESTIONS + commit + push → report BLOCKED
+     BLOCKED → delete checkpoint →
+                 reason `spec-ambiguity`: write QUESTIONS.md (owner arbitration, CR-40)
+                 reason `needs-replan`: no QUESTIONS entry — the latest audit report and the
+                   task sheet are the Architect's input (§7, ARCHITECT.md §9)
+               → commit + push (progress [+ QUESTIONS]) → report BLOCKED
      RETRY   → write checkpoint → commit + push (progress + checkpoint) → report RETRY
     → end session   (RETRY: the Dispatcher re-spawns a fresh Controller for the same task)
 ```
@@ -136,12 +151,13 @@ Type: DONE
 ```markdown
 ## Controller Report — task-XXX
 Type: BLOCKED
+Blocked-reason: needs-replan   // or: spec-ambiguity
 - Status: BLOCKED
-- Reason: attempt cap reached (CR-01) / spec ambiguity (state which)
-- Try count: 3/3
-- Last audit: audit-XXX-n → FAIL
-- QUESTIONS.md new entry: Q-XXX (<short>)
-- Commit: <sha> (current progress + QUESTIONS, pushed)
+- Reason: <one line — attempt cap reached on remediable finding / structurally-unsatisfiable / existence pre-flight failed / spec ambiguity>
+- Try count: N/3
+- Last audit: audit-XXX-n → FAIL   // or "pre-flight" if the existence check failed
+- QUESTIONS.md new entry: Q-XXX (<short>)   // only for spec-ambiguity; "none" for needs-replan
+- Commit: <sha> (current progress [+ QUESTIONS], pushed)
 ```
 
 ### RETRY report (non-terminal)
@@ -165,6 +181,13 @@ Type: RETRY
 > (§4 CR-02). Any other place a token is echoed (e.g. the commit message
 > convention in §6) must reuse the same uppercase spelling, so a case-sensitive
 > watcher matches reliably everywhere the token appears.
+>
+> **`Blocked-reason` is a separate field**, carried only on BLOCKED, exactly one of
+> `needs-replan` or `spec-ambiguity`. It never changes the `Type:` token (which stays
+> `BLOCKED`), so a watcher matching `Type: BLOCKED` is unaffected; it only tells the
+> Dispatcher which BLOCKED route to take (§7): `needs-replan` → spawn a fresh Architect
+> to re-decompose (ARCHITECT.md §9); `spec-ambiguity` → relay QUESTIONS.md to the owner
+> (CR-40). The Dispatcher parses the reason but never decides the route itself.
 
 ---
 
@@ -199,6 +222,23 @@ reads it from disk (step 2b). On DONE or BLOCKED (terminal), the Controller dele
 the task is finished and must not resume. The Controller never adopts an abnormal Implementer's
 uncommitted tree (CR-50); on the abnormal path the checkpoint records `redo Implementer` and only
 the checkpoint (plus any already-committed progress) is committed.
+
+### CR-03 No plain reset — only a structural change re-opens a BLOCKED task
+BLOCKED is terminal for the Controller: it deletes the checkpoint, never re-opens the task on its
+own, and `try_count` is never reset by any agent. A terminal BLOCKED is NOT re-opened by a plain
+re-dispatch — re-running the same task against the same task sheet and acceptance criterion is the
+inner loop re-run at larger blast radius; it cannot change the result, and deciding "try once more"
+is exactly the subjective convergence judgment the framework withholds from every agent (§4
+convergence note, AGENTS §2.5).
+
+- A `needs-replan` BLOCKED is re-opened only by a **structural change**: an Architect re-decomposes
+  the task against the frozen spec (ARCHITECT.md §9). Bounding that re-decomposition loop is the
+  Architect's job via a persisted `replan_count` (ARCHITECT.md §9), NOT the Controller's.
+- A `spec-ambiguity` BLOCKED is re-opened only by an **owner ruling** (CR-40).
+
+Two loops, two owners: `try_count` = within-task (Controller + checkpoint, deleted on BLOCKED);
+`replan_count` = across-BLOCKED (Architect + a counter that survives BLOCKED). The Controller holds
+only `try_count`; it never reads, writes, or resets `replan_count`.
 
 ---
 
@@ -274,6 +314,8 @@ from live git at the moment of the check — never from an injected environment 
 | Whole-feature final audit after all tasks complete | Dispatcher |
 | Crash recovery | Dispatcher re-dispatches a fresh Controller for the task |
 | Re-spawn a fresh Controller on `Type: RETRY` (per-attempt lifecycle, §1 / §4 CR-02) | Dispatcher |
+| Re-decompose a `Blocked-reason: needs-replan` task | Dispatcher spawns a fresh Architect (ARCHITECT.md §9); the Architect decides re-split vs escalate and owns `replan_count` |
+| Relay a `Blocked-reason: spec-ambiguity` to the owner (CR-40) | Dispatcher |
 | Secret-scan-before-push (optional) | Deployment policy |
 
 No CONTROL/stop mechanism exists: Controller is single-task and short-lived; to halt, the
@@ -299,6 +341,17 @@ fresh Controller to redo the task.
 ---
 
 ## 9. Subagent Dispatch
+
+### Pre-auditor (existence pre-flight — attempt 1 only, §2 step 2c)
+```
+Task: pre-audit task-XXX
+Read AGENTS.md and AUDITOR.md §1 Mode A before starting.
+Run the existence pre-flight (always) and the spec-consistency check (only if an AGENTS.md
+§6.1 trigger fires). Do not review any code.
+Report: _doc/audits/pre-audit-XXX-n.md
+Conclusion: CONSISTENT or INCONSISTENT.
+Respond in Traditional Chinese (Taiwan usage).
+```
 
 ### Implementer
 ```
@@ -347,6 +400,8 @@ Respond in Traditional Chinese (Taiwan usage).
 - ❌ Relay Implementer output into the Auditor prompt (CR-32)
 - ❌ Modify or add task scope (CR-41)
 - ❌ Dispatch a subagent while state is uncommitted (enforced actively by CR-50)
+- ❌ Reset `try_count`, or re-open a terminal BLOCKED without a structural change (CR-03)
+- ❌ Read, write, or reset `replan_count` — that counter is the Architect's (CR-03, ARCHITECT.md §9)
 
 ---
 

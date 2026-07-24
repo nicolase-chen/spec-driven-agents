@@ -15,7 +15,8 @@
 |---------------------|--------------------------------|
 | Role behavioral contracts (Controller / Auditor / ...) | Session spawning, scheduling, lifecycle |
 | A single task's convergence loop | Cross-task selection, ordering, deadlock, quota, budget |
-| Outcome token contract (`Type: DONE/BLOCKED/RETRY`) | Parsing that token; re-spawning a fresh Controller on RETRY; deciding what runs next |
+| Outcome token contract (`Type: DONE/BLOCKED/RETRY`) + `Blocked-reason` sub-field | Parsing them; re-spawning a fresh Controller on RETRY; spawning a fresh Architect on `needs-replan`; relaying QUESTIONS on `spec-ambiguity`; deciding what runs next |
+| BLOCKED-reason routing semantics + the replan cap (enforced inside Controller / Architect) | Spawning the fresh Architect / Controllers mechanically — WITHOUT counting attempts/replans or judging whether to retry |
 | Git-state authority rules (AGENTS.md §2.7) | Honoring them for anything YOU report |
 
 ## 2. Session input contract (answers "do I pass git status in?")
@@ -46,4 +47,15 @@ Before you report a git- or session-state fact:
 - Re-spawn a fresh Controller on `Type: RETRY` (CONTROLLER.md §1 / §4 CR-02): a RETRY report ends
   one Controller life but NOT the task — read the token, spawn a new Controller for the same task;
   it resumes from the checkpoint. Do not treat a RETRY session's termination as task completion.
+- On a `Type: BLOCKED` report, route by its `Blocked-reason` field — mechanically, never by your
+  own judgment (CONTROLLER.md §3):
+  - `needs-replan` → spawn a fresh Architect session for that task (autonomous replan mode,
+    ARCHITECT.md §9). The Architect re-decomposes and owns the `replan_count` cap. You do NOT count
+    replans, do NOT decide re-split vs escalate, and do NOT plain-re-dispatch the same task to a
+    Controller. When the Architect emits new / corrected task sheets, dispatch fresh Controllers for
+    them as usual.
+  - `spec-ambiguity` → relay QUESTIONS.md to the owner; never auto-answer (CR-40).
+- Do not invent a "reset" action: re-running a BLOCKED task against the same task sheet without a
+  structural change (re-decomposition or owner ruling) is not a Dispatcher power (CONTROLLER.md
+  CR-03). The only bounded ways forward from BLOCKED are the two routes above.
 - Relay QUESTIONS.md items to the spec owner; never auto-answer (CR-40).

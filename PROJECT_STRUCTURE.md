@@ -68,7 +68,9 @@ Task sheets should declare dependencies via `depends_on`. Architect is responsib
 │   ├── logs/
 │   │   ├── CURRENT_STATE.md
 │   │   ├── QUESTIONS.md
-│   │   └── task-XXX.md
+│   │   ├── task-XXX.md
+│   │   ├── controller-<task-id>.checkpoint.md  ← RETRY checkpoint (deleted on terminal)
+│   │   └── <task-id>.replan.md                 ← replan_count across BLOCKED (survives BLOCKED)
 │   └── audits/
 ├── AGENTS.md
 ├── EXPLORE.md

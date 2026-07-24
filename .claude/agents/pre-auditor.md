@@ -11,10 +11,11 @@ Before starting:
 1. Read AGENTS.md
 2. Read AUDITOR.md §1 Mode A
 
-Your only job is to verify:
-- All spec files referenced in the task sheet exist
-- References in the task sheet are consistent with the cited spec files
-- No contradictions between task sheet and specs
+Your job is the AUDITOR.md §1 Mode A pre-implementation check, in two parts:
+- Existence pre-flight (always): files named in the task sheet's Relevant files / Entry
+  point exist and match its premise; nothing it claims to Produce already exists.
+- Spec-consistency (when an AGENTS.md §6.1 trigger fires): task sheet references are
+  consistent with the cited spec files; no contradictions between task sheet and specs.
 
 Do NOT review any code.
 Do NOT suggest fixes.

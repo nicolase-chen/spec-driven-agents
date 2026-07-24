@@ -24,6 +24,9 @@
 
 # Controller mode (autonomous single-task implement→audit convergence)
 [CONTROLLER] Read AGENTS.md and CONTROLLER.md, then drive the assigned task-XXX to DONE or BLOCKED.
+
+# Architect — autonomous replan mode (Dispatcher-triggered on BLOCKED: needs-replan)
+[ARCHITECT] Read AGENTS.md and ARCHITECT.md §9, then re-decompose task-XXX against the frozen spec (replan mode only — never change a spec).
 ```
 
 ---
@@ -33,7 +36,7 @@
 | Role | Spec File | Core Responsibility |
 |------|-----------|-------------------|
 | Explore | `EXPLORE.md` | Freeform thinking mode before Architect's formal process — build context, lay out candidate directions, no binding output |
-| Architect | `ARCHITECT.md` | Requirements, spec design, task breakdown, execution lead, audit trigger |
+| Architect | `ARCHITECT.md` | Requirements, spec design, task breakdown, execution lead, audit trigger; in autonomous execution, Dispatcher-triggered replan of a `needs-replan` task (ARCHITECT.md §9) |
 | Controller | `CONTROLLER.md` | Drive a single task's implement→audit convergence; decide DONE or BLOCKED |
 | Implementer | `IMPLEMENTER.md` | Implement per task spec, write tests, maintain logs |
 | Auditor | `AUDITOR.md` | Audit implementation against spec, produce objective report |
@@ -67,8 +70,10 @@ AGENTS.md                  ← Master spec (this file)
     ├── tasks/             ← Task sheets (maintained by Architect)
     ├── logs/
     │   ├── CURRENT_STATE.md   ← Current project state (update every session end)
-    │   ├── QUESTIONS.md       ← Pending questions (Implementer writes, Architect resolves)
-    │   └── task-XXX.md        ← Per-task execution log
+    │   ├── QUESTIONS.md       ← Pending questions (Implementer writes, Architect/owner resolves)
+    │   ├── task-XXX.md        ← Per-task execution log
+    │   ├── controller-<task-id>.checkpoint.md ← RETRY checkpoint (Controller; deleted on terminal)
+    │   └── <task-id>.replan.md                ← replan_count across BLOCKED (Architect §9; survives BLOCKED)
     └── audits/            ← Audit reports (produced by Auditor)
 ```
 
@@ -163,9 +168,17 @@ Role division:
   §0). Its evidence is files on disk (read live) and the spec/task/log docs.
 - **Controller** is the git-state authority within a task: it verifies commit,
   cleanliness, and HEAD with live git (CONTROLLER.md §6, CR-50/51/52).
+- The **Architect** in autonomous replan mode (ARCHITECT.md §9) commits and pushes
+  its own task-sheet / counter changes and derives any git-state claim from live git.
 - The **external Dispatcher / orchestrator** is out of framework scope, but the
   same rule binds it by contract for any git- or session-state it reports
   (see DISPATCHER_CONTRACT.md).
+
+**Implementer self-reports are not authoritative.** Any terminal verdict (DONE/PASS),
+audit filename, commit SHA, or test result written by the Implementer is untrusted until
+independently verified against live git and the on-disk artifacts. The Controller verifies
+it (CR-50/52); a mismatch is an abnormal Implementer result, not a passing state. The
+Implementer reports only "work complete, pending review" (IMPLEMENTER.md §4.5).
 
 ---
 
@@ -320,19 +333,27 @@ Audits are tiered. Use the lightest tier that fits; escalate only when a
 trigger fires.
 These triggers are defined by task risk, not by who executes them. The executor — Architect in manual execution, Controller in autonomous execution — applies them.
 
-### 6.1 Pre-implementation spec consistency check (Mode A)
-Trigger a Mode A check before invoking Implementer when any of these hold:
+### 6.1 Pre-implementation check (Mode A)
+Mode A has two parts (AUDITOR.md §1), both existence/spec inspection only — no code review.
+The executor runs it before invoking Implementer (Architect in manual execution; in autonomous
+execution the Controller runs it on attempt 1, CONTROLLER.md §2 step 2c).
 
-| Situation | Trigger Mode A? |
+**Existence pre-flight — always run, for every task:** the task sheet's Relevant files / Entry
+point exist and match its stated premise, and nothing it claims to Produce already exists (if it
+does → INCONSISTENT, "scope needs Architect reconciliation" → routes to `needs-replan`).
+
+**Spec-consistency check — conditional**, triggered when any of these hold:
+
+| Situation | Trigger spec-consistency? |
 |-----------|-----------------|
 | Task sheet references 2+ spec files | ✅ |
 | Task has depends_on entries | ✅ |
 | Task adds or modifies any API interface | ✅ |
 | Task modifies a shared structure used by multiple modules | ✅ |
-| None of the above | ⛔ skip |
+| None of the above | ⛔ skip (existence pre-flight still runs) |
 
-Mode A scope is spec consistency only — no code review. Prompt:
-`[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation spec consistency check for task-XXX. Verify only: are all references in the task sheet consistent with the cited spec files? Do not review any code.`
+Prompt:
+`[AUDITOR] Read AGENTS.md and AUDITOR.md, then perform a pre-implementation check for task-XXX: always run the existence pre-flight; additionally run the spec-consistency check if a §6.1 trigger fires. Do not review any code.`
 
 ### 6.2 Post-task review gate (Mode B) — runs after every task
 After each Implementer task completes, the executor dispatches the

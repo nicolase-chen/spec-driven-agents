@@ -37,11 +37,22 @@ Auditor never touches git and never reasons about git state:
 
 ## 1. Four Audit Modes
 
-### Mode A: Pre-implementation (spec consistency check)
-- Triggered by Architect before invoking Implementer
-- Scope: verify task sheet references are consistent with cited spec files only
-- Do NOT review any code
-- Conclusion: CONSISTENT or INCONSISTENT
+### Mode A: Pre-implementation (existence pre-flight + spec consistency)
+- Triggered before invoking Implementer by the executor (Architect in manual
+  execution, Controller in autonomous execution)
+- Two parts, both by document/existence inspection only — never a code review:
+  - **Existence pre-flight — always run, for every task:**
+    - every file named in the task sheet's Relevant files / Entry point actually
+      exists, and its structure matches the task's stated premise (e.g. when the
+      sheet says "mirror existing X", X is actually present in the named file);
+    - every interface the task claims to Produce does not already exist. If it is
+      already delivered (e.g. by an earlier task), conclude INCONSISTENT with
+      "scope needs Architect reconciliation".
+  - **Spec-consistency check — when any AGENTS.md §6.1 trigger fires:** verify all
+    task sheet references are consistent with the cited spec files.
+- Do NOT review any code in either part.
+- Conclusion: CONSISTENT or INCONSISTENT (an existence mismatch, or a Produces that
+  already exists, is INCONSISTENT)
 - Report named: _doc/audits/pre-audit-<task-id>-<n>.md
 
 ### Mode B: Post-task review gate (lightweight)
@@ -183,6 +194,29 @@ Format: "Spec requires X. Implementation does Y." Expected and actual values may
 
 List as a separate "Spec Ambiguities" section at the end of the report. Describe only — Architect arbitrates.
 
+### 4.4 Convergence class (tag every FAIL)
+
+For any FAIL (Mode C only — Mode B does no reasoning and never returns FAIL), tag
+the single blocking finding into exactly one class. This is a **categorical**
+statement about the *nature* of the finding — never a judgment about whether the
+task is "converging", which stays out of every agent's hands (CONTROLLER.md §4):
+
+- **remediable** — fixable by an in-scope code/doc action in a further attempt.
+- **structurally-unsatisfiable (decomposition)** — the finding targets a fact no
+  in-scope post-hoc action can change (ordering of past events, already-shipped
+  state), OR the task as decomposed cannot reach the criterion (cut too large,
+  wrong entry point, Relevant files / Produces mismatch). The remedy is
+  re-decomposition against the frozen spec, not another attempt.
+- **criterion-defect / spec-ambiguity** — the acceptance criterion itself is
+  ambiguous or incomplete, or resolving the finding needs intent only the owner
+  holds. The remedy is an owner ruling, not iteration.
+
+State the class as fact; the Controller routes on it mechanically (CONTROLLER.md
+§5) and the owner/Architect arbitrates the remedy. Objective tests for the
+non-remediable classes: the same finding recurs across attempts with its nature
+unchanged, the finding targets a historical/ordering fact, or it reveals a class
+the acceptance criterion does not cover.
+
 ---
 
 ## 5. Audit Conclusion
@@ -217,6 +251,10 @@ List as a separate "Spec Ambiguities" section at the end of the report. Describe
 - Location: `<file path>:<line>`
 - Spec reference: `<doc>` §X: "<original text>"
 - Finding: Spec requires X. Implementation does Y.
+
+## Convergence Class (only if FAIL — §4.4)
+- Class: remediable / structurally-unsatisfiable (decomposition) / criterion-defect / spec-ambiguity
+- Basis: <the categorical reason for the class — nature of the finding, not task trajectory>
 
 ## Spec Ambiguities (if any)
 <describe contradictions or gaps found in the spec>

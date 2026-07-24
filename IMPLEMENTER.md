@@ -167,6 +167,13 @@ stopping and raising a question — it is never a silent decision.
 - ❌ Edit any file outside the task sheet's declared scope. If the task
   genuinely needs a file not listed, stop, write to QUESTIONS.md, and
   terminate — do not edit it silently.
+- ❌ Write any terminal verdict (DONE / PASS) into a status document
+  (CURRENT_STATE.md, task log), or cite an audit filename, commit SHA, or test
+  result that does not exist or has not been verified. Report only "work
+  complete, pending review" — declaring terminal state is the Controller's job,
+  from live git (CONTROLLER.md §2, CR-52). Recording the Base / Head SHA of
+  commits you actually made (§6) is fine: that is your own verified work, not a
+  terminal verdict.
 
 ---
 

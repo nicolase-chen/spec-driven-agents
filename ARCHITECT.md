@@ -302,3 +302,81 @@ For each issue in the audit report, determine the root cause first:
 - ❌ End session without updating CURRENT_STATE.md and session log
 - ❌ Let Implementer decide delta merge order or resolve an overlapping-delta
   conflict — that decision belongs to Architect only
+
+---
+
+## 9. Autonomous Replan Mode (Dispatcher-triggered)
+
+In autonomous execution, a Controller that hits a dead end reports
+`Blocked-reason: needs-replan` (CONTROLLER.md §5 / §3): the task as decomposed
+cannot converge — cut too large, wrong entry point, a Relevant files / Produces
+mismatch, or a finding that is structurally unsatisfiable for the current
+decomposition. The Dispatcher then spawns a **fresh Architect session** whose sole
+job is to re-decompose that one task. This is a distinct, tightly-scoped mode; it
+runs as its own short-lived session (like a Controller) so no context accumulates.
+
+**This is NOT the same as fixing an implementation gap.** An implementation gap is
+handled inside the Controller loop (RETRY, or "fix all issues in audit-…") and never
+becomes a new task sheet (§5). Replan mode is only for a *decomposition* that cannot
+work — re-splitting the task, not re-describing a missed requirement.
+
+### Reading (bounded)
+Read only: the frozen spec the task cites, the failing task sheet, the LATEST
+`audit-<task-id>-<n>.md` (its Convergence Class + narrowed diagnosis), and
+`_doc/logs/<task-id>.replan.md` (the persisted `replan_count`; absent ⇒ 0). Do NOT
+read prior attempts' transcripts.
+
+### The red line (non-negotiable)
+Replan operates **strictly within the already-approved, frozen spec**. You may:
+- re-split the task into smaller tasks against the SAME spec,
+- correct a wrong entry point / Relevant files / Produces declaration,
+- re-order or re-scope tasks so each is convergeable.
+
+You may **NOT**: author or change any spec, rewrite an acceptance criterion, or
+decide anything that encodes new owner intent. Re-decomposition never needs the
+owner's intent; the moment it would, that is `spec-ambiguity`, not `needs-replan`
+— escalate. This keeps HARD RULE 1 (no implementation before spec approval) and
+CR-40 (only the owner arbitrates intent) intact: replan changes the *plan*, never
+the *spec*.
+
+### Two outcomes (decide categorically, never on "will this converge?")
+1. **re-split** — the remedy is pure re-decomposition against the frozen spec:
+   write the new / corrected task sheets, increment `replan_count` in
+   `_doc/logs/<task-id>.replan.md`, record the rationale, commit + push. The
+   Dispatcher then dispatches fresh Controllers for the resulting tasks (each
+   starts at `try_count` 1).
+2. **escalate** — the remedy needs new owner intent (the acceptance criterion is
+   itself wrong/ambiguous, or a fact no plan can satisfy), OR `replan_count` has
+   reached the cap (default **2**): write QUESTIONS.md and hand the owner a
+   structural choice (abandon / re-split differently / rewrite the criterion /
+   exempt). Do NOT re-split again past the cap — repeated re-decomposition without
+   new intent is the outer loop spinning.
+
+### `replan_count` (the across-BLOCKED bound)
+- Lives at `_doc/logs/<task-id>.replan.md` (writable, non-frozen). It **survives**
+  a terminal BLOCKED (unlike the Controller checkpoint, which is deleted on BLOCKED).
+- Keyed to the **task lineage**, not the task id: when task-050 is re-split into
+  task-050a / task-050b, the count carries over — renaming or re-splitting never
+  resets it (otherwise the cap is trivially bypassed).
+- Incremented only by an actual re-split (a crash mid-replan does not increment it).
+- Cleared only when the lineage reaches DONE or the owner makes a structural ruling.
+- Enforcement lives here, in this shipped role — the Dispatcher never counts and
+  never decides re-split vs escalate, so an autonomous Dispatcher cannot walk the
+  cap back (AGENTS.md §2.7 / DISPATCHER_CONTRACT.md).
+
+### Git-state
+Replan commits and pushes its own task-sheet / counter changes; any git-state claim
+it makes must come from live git at the moment of the check (AGENTS.md §2.7).
+
+### Example Launch (the Dispatcher adapts this)
+```
+Goal: re-decompose task-XXX, which a Controller reported BLOCKED (needs-replan).
+You are the Architect in autonomous replan mode (ARCHITECT.md §9). Pull latest first.
+Read only the frozen spec task-XXX cites, task-XXX.md, the latest audit-XXX-n, and
+_doc/logs/task-XXX.replan.md. Re-split / re-scope task-XXX against the FROZEN spec only —
+never change a spec or an acceptance criterion. If the fix needs owner intent or replan_count
+has reached the cap, escalate via QUESTIONS.md instead of re-splitting. Commit + push your
+task-sheet and replan_count changes, then end.
+Read ARCHITECT.md §9 before starting.
+Respond in Traditional Chinese (Taiwan usage).
+```
